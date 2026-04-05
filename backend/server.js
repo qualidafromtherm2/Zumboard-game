@@ -818,6 +818,29 @@ app.get('/api/rooms/my-room', authenticateToken, async (req, res) => {
     }
 
     const room = result.rows[0];
+
+    // Auto-repair: se personagem_caminho é null, derivar da carta equipada no slot 79
+    if (salaOnline && !salaOnline.personagem_caminho) {
+      try {
+        const slot79 = await pool.query(
+          `SELECT c.caminho_imagem FROM mtkin.cartas_ativas ca
+           JOIN mtkin.cartas c ON c.id = ca.id_carta
+           WHERE ca.id_jogador = $1 AND ca.id_slot = '79' AND ca.id_sala = $2 LIMIT 1`,
+          [userId, room.id]
+        );
+        if (slot79.rows.length > 0) {
+          const charPath = deriveCharacterPath(slot79.rows[0].caminho_imagem);
+          if (charPath) {
+            await pool.query('UPDATE mtkin.sala_online SET personagem_caminho = $1 WHERE id_player = $2',
+              [charPath, userId]);
+            salaOnline = { ...salaOnline, personagem_caminho: charPath };
+            console.log(`🔧 [MY-ROOM AUTO-REPAIR] personagem_caminho corrigido para jogador ${userId}: ${charPath}`);
+          }
+        }
+      } catch (repairErr) {
+        console.error(`⚠️ [MY-ROOM AUTO-REPAIR] Erro:`, repairErr.message);
+      }
+    }
     const countResult = await pool.query(
       'SELECT COUNT(*)::int AS total FROM mtkin.cartas_no_jogo WHERE id_sala = $1 AND id_jogador = $2',
       [room.id, userId]
@@ -910,6 +933,32 @@ app.get('/api/rooms/online-players', authenticateToken, async (req, res) => {
     );
 
     const prontos = playersResult.rows[0]?.prontos_organizacao || [];
+
+    // Auto-repair: se personagem_caminho é null, derivar da carta equipada no slot 79
+    for (const p of playersResult.rows) {
+      if (!p.personagem_caminho) {
+        try {
+          const slot79 = await pool.query(
+            `SELECT c.caminho_imagem FROM mtkin.cartas_ativas ca
+             JOIN mtkin.cartas c ON c.id = ca.id_carta
+             WHERE ca.id_jogador = $1 AND ca.id_slot = '79' AND ca.id_sala = $2 LIMIT 1`,
+            [p.id_player, roomId]
+          );
+          if (slot79.rows.length > 0) {
+            const charPath = deriveCharacterPath(slot79.rows[0].caminho_imagem);
+            if (charPath) {
+              await pool.query('UPDATE mtkin.sala_online SET personagem_caminho = $1 WHERE id_player = $2 AND nome_sala = $3',
+                [charPath, p.id_player, roomName]);
+              p.personagem_caminho = charPath;
+              console.log(`🔧 [AUTO-REPAIR] personagem_caminho corrigido para jogador ${p.id_player}: ${charPath}`);
+            }
+          }
+        } catch (repairErr) {
+          console.error(`⚠️ [AUTO-REPAIR] Erro ao reparar personagem do jogador ${p.id_player}:`, repairErr.message);
+        }
+      }
+    }
+
     const players = playersResult.rows.map(p => ({
       id_player:          p.id_player,
       nome_jogador:       p.nome_jogador,
