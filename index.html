@@ -9,32 +9,17 @@
     <script>
       // ── Supabase Storage — URL base para assets (imagens, vídeos, áudio) ──
       window.ASSETS_BASE = 'https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets';
-      (function() {
-        var B = window.ASSETS_BASE;
-        var assetRx = /^\.\/(Mini_card|Fundo da pagina|Mapa normal|Personagens|Cartas)/;
-        document.addEventListener('DOMContentLoaded', function() {
-          document.querySelectorAll('img[src^="./"], source[src^="./"]').forEach(function(el) {
-            var src = el.getAttribute('src');
-            if (assetRx.test(src)) el.setAttribute('src', B + '/' + encodeURI(src.slice(2)));
-          });
-          document.querySelectorAll('[style*="--texture-image"]').forEach(function(el) {
-            var s = el.getAttribute('style');
-            el.setAttribute('style', s.replace(/url\('\.\/Mini_card\//g, "url('" + B + "/Mini_card/"));
-          });
-          document.querySelectorAll('video, audio').forEach(function(el) { el.load(); });
-        });
-      })();
     </script>
   </head>
   <body>
     <video id="waitingVideo" class="waiting-video" autoplay loop muted playsinline>
-      <source src="./Fundo da pagina/Fundo sala de espera.mp4" type="video/mp4" />
+      <source src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20sala%20de%20espera.mp4" type="video/mp4" />
     </video>
     <video id="battleVideo" class="battle-video" autoplay loop muted playsinline>
-      <source src="./Fundo da pagina/Fundo batalha em video.mp4" type="video/mp4" />
+      <source src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20batalha%20em%20video.mp4" type="video/mp4" />
     </video>
     <audio id="battleAudio" preload="auto" loop>
-      <source src="./Fundo da pagina/Musica batalha 2.mp3" type="audio/mpeg" />
+      <source src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Musica%20batalha%202.mp3" type="audio/mpeg" />
     </audio>
     <!-- Modal de Login/Cadastro -->
     <div id="authModal" class="auth-modal active">
@@ -330,7 +315,7 @@
         </div>
       </div>
       <div class="map-layer">
-        <img src="./Mapa normal.png" alt="Tabuleiro" class="map-bg-hidden" />
+        <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mapa%20normal.png" alt="Tabuleiro" class="map-bg-hidden" />
         <div class="card-overlay">
           <span class="card-marker board-slot" data-card="1" style="--x:-76.46%; --y:93.01%; --scale-x:6.48; --scale-y:1.65;">
             <span class="card-label board-slot-number">1</span>
@@ -443,14 +428,14 @@
           <button class="card-message-action is-hidden" id="cancelTroubleBtn" type="button" style="position: absolute; z-index: 1001; left: 50%; top: 60%; transform: translate(-50%, -50%);">Desistir</button>
           <span class="card-marker menu-hub menu-hub-horizontal battle-vs-hub" id="menuHubClone" style="--x:82%; --y:10%; --scale-x:6.24; --scale-y:1.10;">
             <button id="menuAvatarBtnClone" class="menu-hub-avatar menu-hub-avatar-plain menu-hub-with-count" type="button">
-              <img src="./Fundo da pagina/Escudo monstro.png" alt="Escudo monstro" />
+              <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Escudo%20monstro.png" alt="Escudo monstro" />
               <span id="menuHubMonstroCount" class="menu-hub-count">0</span>
             </button>
             <button id="menuShieldBtnClone" class="menu-hub-shield" type="button">
-              <img src="./Fundo da pagina/X de versus.png" alt="X de versus" />
+              <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/X%20de%20versus.png" alt="X de versus" />
             </button>
             <button id="menuBagBtnClone" class="menu-hub-bag menu-hub-with-count" type="button">
-              <img src="./Fundo da pagina/Icone escudo.png" alt="Icone escudo" />
+              <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Icone%20escudo.png" alt="Icone escudo" />
               <span id="menuHubEscudoCount" class="menu-hub-count">0</span>
             </button>
           </span>
@@ -540,46 +525,46 @@
           </span>
           <section class="cartela-bottom" id="cartelaBottom">
             <div class="cartela-bottom-grid">
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="79" data-card="79" style="--texture-image:url('./Mini_card/79.png'); overflow: visible;">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="79" data-card="79" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/79.png'); overflow: visible;">
                 <span class="card-label">79</span>
                 <span class="slot79-overlay slot79-nivel" id="slot79Nivel">1</span>
                 <span class="slot79-overlay slot79-forca" id="slot79Forca">0</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="80" data-card="80" style="--texture-image:url('./Mini_card/80.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="80" data-card="80" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/80.png');">
                 <span class="card-label">80</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="81" data-card="81" style="--texture-image:url('./Mini_card/81.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="81" data-card="81" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/81.png');">
                 <span class="card-label">81</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="82" data-card="82" style="--texture-image:url('./Mini_card/82.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="82" data-card="82" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/82.png');">
                 <span class="card-label">82</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="83" data-card="83" style="--texture-image:url('./Mini_card/83.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="83" data-card="83" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');">
                 <span class="card-label">83</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="84" data-card="84" style="--texture-image:url('./Mini_card/83.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="84" data-card="84" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');">
                 <span class="card-label">84</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="85" data-card="85" style="--texture-image:url('./Mini_card/85.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="85" data-card="85" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/85.png');">
                 <span class="card-label">85</span>
               </div>
-              <div class="cartela-slot card-marker texture-porta" data-slot-number="86" data-card="86" style="--texture-image:url('./Mini_card/86.png');">
+              <div class="cartela-slot card-marker texture-porta" data-slot-number="86" data-card="86" style="--texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/86.png');">
                 <span class="card-label">86</span>
               </div>
             </div>
             <div class="cartela-hub-icons hidden" id="cartelaHubIcons">
               <button id="menuBagBtn" class="menu-hub-bag" type="button" title="Mochila">
-                <img src="./Mini_card/8.png" alt="Mochila" />
+                <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/8.png" alt="Mochila" />
               </button>
               <button id="menuAvatarBtn" class="menu-hub-avatar" type="button" title="Menu">
-                <img id="menuAvatarImage" src="./Mini_card/79.png" alt="Menu" />
+                <img id="menuAvatarImage" src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/79.png" alt="Menu" />
               </button>
               <button id="menuTradeBtn" class="menu-hub-trade" type="button" title="Propostas de Troca">
-                <img src="./Mini_card/10.png" alt="Trocas" />
+                <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/10.png" alt="Trocas" />
                 <span id="menuTradeBadge" class="menu-hub-badge is-hidden">0</span>
               </button>
               <button id="menuHistoricoBtn" class="menu-hub-historico" type="button" title="Histórico">
-                <img src="./Mini_card/9.png" alt="Histórico" />
+                <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/9.png" alt="Histórico" />
               </button>
             </div>
           </section>
@@ -590,66 +575,66 @@
           <span class="card-marker texture-mapa-itens is-opponents-hidden" data-card="L1" style="--x:-37%; --y:6.35%; --scale-x:14; --scale-y:1.8;">
             <span class="card-label">L1</span>
           </span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-81" style="--x:-75%; --y:6.35%; --texture-image:url('./Mini_card/81.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-82" style="--x:-60%; --y:6.35%; --texture-image:url('./Mini_card/82.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-83" style="--x:-45%; --y:6.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-84" style="--x:-30%; --y:6.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-85" style="--x:-15%; --y:6.35%; --texture-image:url('./Mini_card/85.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-86" style="--x:0%; --y:6.35%; --texture-image:url('./Mini_card/86.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-81" style="--x:-75%; --y:6.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/81.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-82" style="--x:-60%; --y:6.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/82.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-83" style="--x:-45%; --y:6.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-84" style="--x:-30%; --y:6.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-85" style="--x:-15%; --y:6.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/85.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L1-mini-86" style="--x:0%; --y:6.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/86.png');"></span>
           <span class="card-marker icon-bag" data-card="L1-extra" data-readout="position" style="--x:-88%; --y:6.35%; --scale-x:1.25; --scale-y:0.8;">
-            <img src="./Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
+            <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
             <span class="opponent-forca-value">0</span>
           </span>
           <span class="card-marker texture-mapa-itens is-opponents-hidden" data-card="L2" style="--x:-37%; --y:22.35%; --scale-x:14; --scale-y:1.8;">
             <span class="card-label">L2</span>
           </span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-81" style="--x:-75%; --y:22.35%; --texture-image:url('./Mini_card/81.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-82" style="--x:-60%; --y:22.35%; --texture-image:url('./Mini_card/82.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-83" style="--x:-45%; --y:22.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-84" style="--x:-30%; --y:22.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-85" style="--x:-15%; --y:22.35%; --texture-image:url('./Mini_card/85.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-86" style="--x:0%; --y:22.35%; --texture-image:url('./Mini_card/86.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-81" style="--x:-75%; --y:22.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/81.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-82" style="--x:-60%; --y:22.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/82.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-83" style="--x:-45%; --y:22.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-84" style="--x:-30%; --y:22.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-85" style="--x:-15%; --y:22.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/85.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L2-mini-86" style="--x:0%; --y:22.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/86.png');"></span>
           <span class="card-marker icon-bag" data-card="L2-extra" data-readout="position" style="--x:-88%; --y:22.35%; --scale-x:1.25; --scale-y:0.8;">
-            <img src="./Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
+            <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
             <span class="opponent-forca-value">0</span>
           </span>
           <span class="card-marker texture-mapa-itens is-opponents-hidden" data-card="L3" style="--x:-37%; --y:38.35%; --scale-x:14; --scale-y:1.8;">
             <span class="card-label">L3</span>
           </span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-81" style="--x:-75%; --y:38.35%; --texture-image:url('./Mini_card/81.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-82" style="--x:-60%; --y:38.35%; --texture-image:url('./Mini_card/82.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-83" style="--x:-45%; --y:38.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-84" style="--x:-30%; --y:38.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-85" style="--x:-15%; --y:38.35%; --texture-image:url('./Mini_card/85.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-86" style="--x:0%; --y:38.35%; --texture-image:url('./Mini_card/86.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-81" style="--x:-75%; --y:38.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/81.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-82" style="--x:-60%; --y:38.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/82.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-83" style="--x:-45%; --y:38.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-84" style="--x:-30%; --y:38.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-85" style="--x:-15%; --y:38.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/85.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L3-mini-86" style="--x:0%; --y:38.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/86.png');"></span>
           <span class="card-marker icon-bag" data-card="L3-extra" data-readout="position" style="--x:-88%; --y:38.35%; --scale-x:1.25; --scale-y:0.8;">
-            <img src="./Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
+            <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
             <span class="opponent-forca-value">0</span>
           </span>
           <span class="card-marker texture-mapa-itens is-opponents-hidden" data-card="L4" style="--x:-37%; --y:54.35%; --scale-x:14; --scale-y:1.8;">
             <span class="card-label">L4</span>
           </span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-81" style="--x:-75%; --y:54.35%; --texture-image:url('./Mini_card/81.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-82" style="--x:-60%; --y:54.35%; --texture-image:url('./Mini_card/82.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-83" style="--x:-45%; --y:54.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-84" style="--x:-30%; --y:54.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-85" style="--x:-15%; --y:54.35%; --texture-image:url('./Mini_card/85.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-86" style="--x:0%; --y:54.35%; --texture-image:url('./Mini_card/86.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-81" style="--x:-75%; --y:54.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/81.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-82" style="--x:-60%; --y:54.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/82.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-83" style="--x:-45%; --y:54.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-84" style="--x:-30%; --y:54.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-85" style="--x:-15%; --y:54.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/85.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L4-mini-86" style="--x:0%; --y:54.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/86.png');"></span>
           <span class="card-marker icon-bag" data-card="L4-extra" data-readout="position" style="--x:-88%; --y:54.35%; --scale-x:1.25; --scale-y:0.8;">
-            <img src="./Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
+            <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
             <span class="opponent-forca-value">0</span>
           </span>
           <span class="card-marker texture-mapa-itens is-opponents-hidden" data-card="L5" style="--x:-37%; --y:70.35%; --scale-x:14; --scale-y:1.8;">
             <span class="card-label">L5</span>
           </span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-81" style="--x:-75%; --y:70.35%; --texture-image:url('./Mini_card/81.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-82" style="--x:-60%; --y:70.35%; --texture-image:url('./Mini_card/82.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-83" style="--x:-45%; --y:70.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-84" style="--x:-30%; --y:70.35%; --texture-image:url('./Mini_card/83.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-85" style="--x:-15%; --y:70.35%; --texture-image:url('./Mini_card/85.png');"></span>
-          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-86" style="--x:0%; --y:70.35%; --texture-image:url('./Mini_card/86.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-81" style="--x:-75%; --y:70.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/81.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-82" style="--x:-60%; --y:70.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/82.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-83" style="--x:-45%; --y:70.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-84" style="--x:-30%; --y:70.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/83.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-85" style="--x:-15%; --y:70.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/85.png');"></span>
+          <span class="card-marker texture-porta is-opponents-hidden" data-card="L5-mini-86" style="--x:0%; --y:70.35%; --texture-image:url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/86.png');"></span>
           <span class="card-marker icon-bag" data-card="L5-extra" data-readout="position" style="--x:-88%; --y:70.35%; --scale-x:1.25; --scale-y:0.8;">
-            <img src="./Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
+            <img src="https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Mini_card/8.png" alt="Mochila" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />
             <span class="opponent-forca-value">0</span>
           </span>
           <span class="card-marker" data-card="M1" style="--x:-95%; --y:6.35%; --scale-x:3.85; --scale-y:1.6;">
@@ -6923,10 +6908,11 @@
       };
 
       function buildCardImageUrl(card) {
-        if (!card?.caminho_imagem) return defaultDoorCardImage;
-        if (card.caminho_imagem.startsWith('http')) return card.caminho_imagem;
-        const safePath = encodeURI(card.caminho_imagem);
-        return `${ASSETS_BASE}/${safePath}`;
+        const raw = card?.caminho_imagem || card?.imageUrl || '';
+        if (!raw) return defaultDoorCardImage;
+        if (raw.startsWith('http')) return raw;
+        const clean = raw.startsWith('/') ? raw.slice(1) : raw;
+        return `${ASSETS_BASE}/${encodeURI(clean)}`;
       }
 
       // Retorna URL do vídeo do monstro se a carta for da pasta Cidade e tiver vídeo disponível
