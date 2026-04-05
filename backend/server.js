@@ -13,8 +13,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback) {
+    // Permitir requests sem origin (curl, mobile, etc) e qualquer localhost/render
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('.onrender.com')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // liberar para dev; restringir depois se necessário
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
+
+// Servir frontend estático (index.html, styles.css, .github/) a partir da raiz do projeto
+app.use(express.static(path.resolve(__dirname, '..')));
 
 // Servir arquivos estáticos (para as imagens das cartas)
 // Priorizar acervo raiz Cartas; manter fallback para backend/Cartas
