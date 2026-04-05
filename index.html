@@ -2229,7 +2229,7 @@
           characterBadge.classList.add('hidden');
           if (menuAvatarBtn && menuAvatarImage) {
             menuAvatarBtn.classList.remove('is-empty');
-            menuAvatarImage.src = './Mini_card/79.png';
+            menuAvatarImage.src = `${ASSETS_BASE}/Mini_card/79.png`;
           }
           return;
         }
@@ -2239,7 +2239,7 @@
         characterBadge.classList.remove('hidden');
         if (menuAvatarBtn && menuAvatarImage) {
           menuAvatarBtn.classList.remove('is-empty');
-          menuAvatarImage.src = './Mini_card/79.png';
+          menuAvatarImage.src = `${ASSETS_BASE}/Mini_card/79.png`;
         }
       }
 
@@ -4453,7 +4453,7 @@
               if (!slotElement.classList.contains('texture-porta')) slotElement.classList.add('texture-porta');
               // Restaurar ícone padrão do slot (Mini_card/81.png etc.)
               const slotNum = cardId.split('-').pop();
-              slotElement.style.setProperty('--texture-image', `url('./Mini_card/${slotNum}.png')`);
+              slotElement.style.setProperty('--texture-image', `url('${ASSETS_BASE}/Mini_card/${slotNum}.png')`);
               slotElement.style.removeProperty('--slot-icon-image');
               const label = slotElement.querySelector('.card-label');
               if (label) label.style.display = '';
@@ -11177,19 +11177,19 @@
       setupTreasureRestrictionHandlers();
 
       const equipIconMap = {
-        79: './Mini_card/79.png',
-        80: './Mini_card/80.png',
-        81: './Mini_card/81.png',
-        82: './Mini_card/82.png',
-        83: './Mini_card/83.png',
-        84: './Mini_card/83.png',
-        85: './Mini_card/85.png',
-        86: './Mini_card/86.png'
+        79: `${ASSETS_BASE}/Mini_card/79.png`,
+        80: `${ASSETS_BASE}/Mini_card/80.png`,
+        81: `${ASSETS_BASE}/Mini_card/81.png`,
+        82: `${ASSETS_BASE}/Mini_card/82.png`,
+        83: `${ASSETS_BASE}/Mini_card/83.png`,
+        84: `${ASSETS_BASE}/Mini_card/83.png`,
+        85: `${ASSETS_BASE}/Mini_card/85.png`,
+        86: `${ASSETS_BASE}/Mini_card/86.png`
       };
 
       function getEquipIconPath(value) {
         const numeric = Number(value);
-        return equipIconMap[numeric] || './Mini_card/6.png';
+        return equipIconMap[numeric] || `${ASSETS_BASE}/Mini_card/6.png`;
       }
 
       function populateEquiparOnde(containerId) {
