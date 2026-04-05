@@ -4341,7 +4341,7 @@
             })
             .slice(0, maxPlayers);
           const rendered = picks.map((player) => {
-            const safeSrc = encodeURI(player.personagem_caminho);
+            const safeSrc = `${ASSETS_BASE}/${encodeURI(player.personagem_caminho)}`;
             const safeName = player.nome_jogador || 'Personagem';
             return `<img src="${safeSrc}" alt="${safeName}">`;
           }).join('');
@@ -4488,7 +4488,7 @@
               if (slotElement && slotData.caminho_imagem) {
                 // Adicionar classes para fundo padrão (Fundo porta.png) + imagem via ::before
                 slotElement.classList.add('texture-porta', 'has-card');
-                slotElement.style.setProperty('--texture-image', `url('./${slotData.caminho_imagem}')`);
+                slotElement.style.setProperty('--texture-image', `url('${ASSETS_BASE}/${encodeURI(slotData.caminho_imagem)}')`);
                 
                 // Remover imagem anterior se existir
                 const existingImg = slotElement.querySelector('.slot-card-image');
@@ -4498,7 +4498,7 @@
 
                 // Criar img invisível para hover preview e drag
                 const img = document.createElement('img');
-                img.src = `./${slotData.caminho_imagem}`;
+                img.src = `${ASSETS_BASE}/${encodeURI(slotData.caminho_imagem)}`;
                 img.dataset.cardText = slotData.texto_da_carta || '';
                 img.dataset.cardName = slotData.nome_carta || '';
                 img.dataset.forca = String(slotData.forca || 0);
@@ -4688,7 +4688,7 @@
             // Substituir o label M pelo personagem do jogador
             if (mLabel && player.personagem_caminho) {
               // Usar caminho completo do personagem
-              const personagemPath = `./${player.personagem_caminho}`;
+              const personagemPath = `${ASSETS_BASE}/${encodeURI(player.personagem_caminho)}`;
               
               // display:block necessário para width/height 100% funcionarem em <span>
               mLabel.style.display = 'block';
@@ -9032,7 +9032,7 @@
             const card = document.createElement('div');
             card.style.cssText = 'cursor:pointer;border:2px solid #555;border-radius:8px;padding:4px;text-align:center;background:#222;transition:border-color 0.2s;';
             card.innerHTML = `
-              <img src="${c.caminho_imagem || ''}" alt="${c.nome_carta}" style="width:80px;height:auto;border-radius:4px;">
+              <img src="${buildCardImageUrl(c)}" alt="${c.nome_carta}" style="width:80px;height:auto;border-radius:4px;">
               <div style="color:#ffd700;font-size:11px;margin-top:4px;">${c.nome_carta}</div>
               <div style="color:#aaa;font-size:10px;">Valor: ${c.valor || 0}</div>
             `;
@@ -9106,7 +9106,7 @@
           const card = document.createElement('div');
           card.style.cssText = 'cursor:pointer;border:2px solid #555;border-radius:8px;padding:4px;text-align:center;background:#222;transition:border-color 0.2s;';
           card.innerHTML = `
-            <img src="${c.caminho_imagem || ''}" alt="${c.nome_carta}" style="width:80px;height:auto;border-radius:4px;">
+            <img src="${buildCardImageUrl(c)}" alt="${c.nome_carta}" style="width:80px;height:auto;border-radius:4px;">
             <div style="color:#ffd700;font-size:11px;margin-top:4px;">${c.nome_carta}</div>
           `;
           card.addEventListener('mouseenter', () => { card.style.borderColor = '#ff4444'; });
@@ -9173,7 +9173,7 @@
           card.style.cssText = 'cursor:pointer;border:2px solid #555;border-radius:8px;padding:4px;text-align:center;background:#222;transition:border-color 0.2s;';
           const origemLabel = c.origem === 'cartela' ? '📋 Cartela' : '🎒 Mochila';
           card.innerHTML = `
-            <img src="${c.caminho_imagem || ''}" alt="${c.nome_carta}" style="width:80px;height:auto;border-radius:4px;">
+            <img src="${buildCardImageUrl(c)}" alt="${c.nome_carta}" style="width:80px;height:auto;border-radius:4px;">
             <div style="color:#ffd700;font-size:11px;margin-top:4px;">${c.nome_carta}</div>
             <div style="color:#aaa;font-size:10px;">${origemLabel}</div>
           `;
@@ -9281,7 +9281,7 @@
             const card = document.createElement('div');
             card.style.cssText = `cursor:pointer;border:2px solid ${isSelected ? '#00ff88' : '#555'};border-radius:8px;padding:4px;text-align:center;background:#222;transition:border-color 0.2s;`;
             card.innerHTML = `
-              <img src="${c.caminho_imagem || ''}" alt="${c.nome_carta || 'Carta'}" style="width:80px;height:auto;border-radius:4px;">
+              <img src="${buildCardImageUrl(c)}" alt="${c.nome_carta || 'Carta'}" style="width:80px;height:auto;border-radius:4px;">
               <div style="color:#ffd700;font-size:11px;margin-top:4px;">${c.nome_carta || 'Carta'}</div>
               <div style="color:#aaa;font-size:10px;">${c.tipo_baralho || '-'}</div>
             `;
@@ -9397,7 +9397,7 @@
             const card = document.createElement('div');
             card.style.cssText = `cursor:pointer;border:2px solid ${isSelected ? '#00ff88' : '#555'};border-radius:8px;padding:4px;text-align:center;background:#222;transition:border-color 0.2s;`;
             card.innerHTML = `
-              <img src="${c.caminho_imagem || ''}" alt="${c.nome_carta || 'Carta'}" style="width:80px;height:auto;border-radius:4px;">
+              <img src="${buildCardImageUrl(c)}" alt="${c.nome_carta || 'Carta'}" style="width:80px;height:auto;border-radius:4px;">
               <div style="color:#ffd700;font-size:11px;margin-top:4px;">${c.nome_carta || 'Carta'}</div>
               <div style="color:#aaa;font-size:10px;">${c.tipo_baralho || '-'}</div>
             `;
@@ -10058,7 +10058,7 @@
         thumb.dataset.pendingKey = key;
         if (card.caminho_imagem) {
           const img = document.createElement('img');
-          img.src = card.caminho_imagem;
+          img.src = buildCardImageUrl(card);
           img.alt = card.nome_carta || '';
           thumb.appendChild(img);
           const hlIconUrl = getSlotIconUrl(card.equipar_onde);
@@ -10227,7 +10227,7 @@
               if (target.personagem_caminho) {
                 const img = document.createElement('img');
                 img.className = 'hand-limit-avatar';
-                img.src = encodeURI(target.personagem_caminho);
+                img.src = `${ASSETS_BASE}/${encodeURI(target.personagem_caminho)}`;
                 img.alt = target.nome_jogador;
                 header.appendChild(img);
               }
@@ -10276,7 +10276,7 @@
         const img    = document.getElementById('victoryCharacterImg');
         const nameEl = document.getElementById('victoryWinnerName');
         const levelEl = document.getElementById('victoryWinnerLevel');
-        if (img) img.src = winner.personagem_caminho ? encodeURI(winner.personagem_caminho) : '';
+        if (img) img.src = winner.personagem_caminho ? `${ASSETS_BASE}/${encodeURI(winner.personagem_caminho)}` : '';
         if (nameEl) nameEl.textContent = winner.nome || 'Jogador';
         if (levelEl) levelEl.textContent = `Nível ${winner.nivel}`;
         modal.classList.remove('is-hidden');
@@ -10775,7 +10775,7 @@
               : `Cartas - Cidade`;
             cardList.innerHTML = currentCards.map(card => `
               <div class="card-item" data-id="${card.id}">
-                <img src="http://localhost:3000/${card.caminho_imagem}" alt="${card.nome_carta}">
+                <img src="${buildCardImageUrl(card)}" alt="${card.nome_carta}">
                 <div class="card-item-info">
                   <div class="card-item-name">${card.nome_carta}</div>
                   <div class="card-item-type">${card.tipo_carta}</div>
@@ -11363,7 +11363,7 @@
         const pesadoSelect = document.getElementById('editPesado');
         if (pesadoSelect) pesadoSelect.value = card.pesado ? 'true' : 'false';
 
-        editCardImage.src = `http://localhost:3000/${card.caminho_imagem}`;
+        editCardImage.src = buildCardImageUrl(card);
         editCardName.textContent = card.nome_carta;
         updateArmadilhaSection(card.categoria || '', card.armadilha || null);
         logEditDebug('applyCardToEditModal');
