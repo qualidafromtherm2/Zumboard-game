@@ -1,0 +1,37 @@
+# ─── Dependências ───────────────────────────────────────
+node_modules/
+.venv/
+
+# ─── Variáveis de ambiente (contêm senhas/tokens) ──────
+.env
+backend/.env
+
+# ─── Assets estáticos (hospedados no Supabase Storage) ─
+Cartas/
+Mini_card/
+Fundo da pagina/
+Personagens/
+Icone_personagem/
+Mapa normal.png
+Tabuleiro.jpg
+backend/Cartas/
+
+# ─── Vídeos e arquivos grandes ──────────────────────────
+Videos a editar/
+*.mp4
+*.mp3
+
+# ─── Arquivos de design / documentos de criação ────────
+110- Munchkin Base-20230324T142250Z-001/
+Arquivos de criação/
+
+# ─── Logs e temporários ────────────────────────────────
+backend/server-out.txt
+backend/server-err.txt
+*.log
+~$*
+
+# ─── IDE / OS ──────────────────────────────────────────
+.vscode/
+.DS_Store
+Thumbs.db

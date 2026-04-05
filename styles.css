@@ -1,0 +1,6127 @@
+@import url('https://fonts.bunny.net/css?family=crushed:400');
+@import url('https://fonts.bunny.net/css?family=creepster:400');
+
+:root {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #040404;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waiting-video,
+.battle-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: -2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  filter: none;
+}
+
+.waiting-video {
+  opacity: 1;
+}
+
+.battle-video {
+  z-index: -1;
+}
+
+body.battle-mode .battle-video {
+  opacity: 1;
+}
+
+body.battle-mode .waiting-video {
+  opacity: 0;
+}
+
+.full-map {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.map-layer {
+  position: relative;
+}
+.equipar-inline-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.equipar-inline-group {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+}
+.equipar-inline-group .equipar-group {
+  flex: 1;
+}
+.equipar-group {
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.inline-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.equipar-top-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.permite-field {
+  width: 100%;
+}
+.permite-field.is-hidden {
+  display: none;
+}
+.equipar-bottom-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.equipar-inline-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.equipar-inline-controls .equipar-checkboxes {
+  flex: 1;
+}
+.card-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.map-layer img {
+  max-width: min(95vw, 1400px);
+  max-height: 95vh;
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Esconder imagem do mapa mantendo dimensões para o layout */
+.map-layer img.map-bg-hidden {
+  visibility: hidden;
+}
+
+/* Posições 1-10 do tabuleiro */
+.card-marker.board-slot {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  position: relative;
+}
+
+.card-marker.board-slot.is-board-dragging {
+  cursor: grabbing;
+  opacity: 0.75;
+  z-index: 9999 !important;
+}
+
+/* Resize handle no canto inferior direito */
+.card-marker.board-slot::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, rgba(240, 210, 120, 0.6) 50%);
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card-marker.board-slot:hover::after {
+  opacity: 1;
+}
+
+.card-marker.board-slot.is-resizing {
+  opacity: 0.8;
+  z-index: 9998 !important;
+}
+
+/* Número do slot no canto inferior direito */
+.board-slot-number {
+  position: absolute;
+  bottom: 3px;
+  right: 5px;
+  font-size: 0.75rem;
+  color: rgba(240, 210, 120, 0.85);
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 2;
+  line-height: 1;
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.card-marker {
+  --scale-x: 1;
+  --scale-y: 1;
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  transform: translate(-50%, -50%) rotate(var(--rotation, 0deg));
+  width: calc(var(--base-w, 6%) * var(--scale-x, 1));
+  height: calc(var(--base-h, 10%) * var(--scale-y, 1));
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.card-marker.mini-card,
+.card-marker.texture-porta.is-opponents-hidden {
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+}
+
+/* Slots cartela dos oponentes (L*-mini*): idêntico ao estilo da cartela do jogador */
+.card-marker.texture-porta[data-card*="-mini"] {
+  width: 72px !important;
+  height: 108px !important;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  background: rgba(30, 30, 30, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  overflow: visible;
+}
+/* Nome da carta nos mini-cards do oponente — idêntico à cartela */
+.card-marker[data-card*="-mini"] .cartela-card-name {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  font-family: 'Creepster', cursive;
+  font-size: 0.55em;
+  color: #000;
+  text-align: center;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+  width: 90%;
+  line-height: 1.15;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+/* Stats nos mini-cards de oponente — idêntico à cartela */
+.card-marker[data-card*="-mini"] .card-stats-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: none;
+  display: block;
+  gap: 0;
+  pointer-events: none;
+}
+.card-marker[data-card*="-mini"] .card-stats-badge .stats-item {
+  display: flex;
+  position: absolute;
+  font-size: 0.4em;
+  padding: 0;
+  border-radius: 2px;
+  margin: 0;
+}
+.card-marker[data-card*="-mini"] .card-stats-badge .stats-icon {
+  width: 28px;
+  height: 28px;
+}
+.card-marker[data-card*="-mini"] .card-stats-badge .stats-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #000;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+/* Força — superior direito */
+.card-marker[data-card*="-mini"] .card-stats-badge .stats-forca {
+  top: 2px;
+  right: 2px;
+}
+/* Valor — inferior direito */
+.card-marker[data-card*="-mini"] .card-stats-badge .stats-valor {
+  bottom: 2px;
+  right: 2px;
+}
+/* Fuga mínima — inferior esquerdo */
+.card-marker[data-card*="-mini"] .card-stats-badge .stats-fuga {
+  bottom: 2px;
+  left: 0;
+}
+
+/* Mochila do oponente sempre acima do M card */
+.card-marker.icon-bag[data-card$="-extra"] {
+  z-index: 10;
+  pointer-events: auto;
+}
+
+/* ── Overlays nos M-cards (nível, força, mochila) ── */
+.card-marker[data-card^="M"] {
+  overflow: visible;
+}
+
+.m-overlay {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Nível — topo esquerda */
+.m-overlay-nivel {
+  top: 2px;
+  left: 2px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+}
+
+/* Força — topo direita */
+.m-overlay-forca {
+  top: 2px;
+  right: 2px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+}
+
+/* Nome do jogador — inferior central */
+.m-overlay-nome {
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #000;
+  font-family: 'Creepster', cursive;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80%;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+
+/* Mochila existente (L-extra) reposicionada no inferior-direito do M-card */
+.card-marker.icon-bag.m-card-mochila {
+  --x: 0 !important;
+  --y: 0 !important;
+  position: absolute !important;
+  top: auto !important;
+  left: auto !important;
+  bottom: 2px !important;
+  right: 2px !important;
+  transform: none !important;
+  width: 42px !important;
+  height: 42px !important;
+}
+
+/* Esconder contador de força na mochila dentro do M-card */
+.card-marker.icon-bag.m-card-mochila .opponent-forca-value {
+  display: none !important;
+}
+
+/* Remover background duplicado da mochila dentro do M-card */
+.card-marker.icon-bag.m-card-mochila {
+  background-image: none !important;
+}
+
+.card-marker.texture-porta[data-card*="-mini"] .card-label {
+  display: none !important;
+}
+
+.card-marker.texture-mapa-itens[data-card^="L"]::before {
+  display: none;
+}
+
+/* Esconder label quando mini-card tem imagem */
+.card-marker.mini-card:has(.slot-card-image) .card-label {
+  display: none;
+}
+
+/* Fundo padrão nos mini-cards do oponente com carta */
+.card-marker:has(.slot-card-image) {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png') !important;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.slot-card-image {
+  object-fit: contain !important;
+  object-position: bottom !important;
+}
+
+/* Ícone do slot (Mini_card) nos mini-cards dos oponentes */
+.card-marker .slot-icon {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 50%;
+  height: auto;
+  max-width: 36px;
+  z-index: 3;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+.card-label {
+  font-size: 1.35rem;
+  color: #f7f7f7;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* Oculta numeracao das slots da cartela */
+.cartela-slot .card-label {
+  display: none;
+}
+/* Mantém ícone/textura visível sempre; labels numéricos seguem ocultos */
+.cartela-slot::before {
+  display: block;
+}
+
+.card-marker.texture-door,
+.card-marker.texture-treasure,
+.card-marker.texture-porta,
+.card-marker.texture-lixo,
+.card-marker.texture-mapa-itens {
+  background: transparent;
+  --texture-scale: 1;
+}
+
+.card-marker.texture-door::before,
+.card-marker.texture-treasure::before,
+.card-marker.texture-porta::before,
+.card-marker.texture-lixo::before,
+.card-marker.texture-mapa-itens::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform-origin: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.card-marker.texture-door::before {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  transform: rotate(270deg) scale(var(--texture-scale, 1));
+}
+
+.card-marker.texture-treasure::before {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20tesouro.png');
+  transform: rotate(270deg) scale(var(--texture-scale, 1));
+}
+
+.card-marker.texture-porta::before {
+  background-image: var(--texture-image, none);
+  transform: scale(var(--texture-scale, 1));
+}
+
+.card-marker.texture-porta.has-card {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.card-marker.texture-porta.has-card::before {
+  background-image: var(--texture-image, none);
+  background-size: contain;
+  background-position: center bottom;
+  z-index: 1;
+}
+
+/* Ícone do slot (Mini_card) no canto superior-esquerdo dos slots da cartela */
+.card-marker.texture-porta.has-card::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 44px;
+  height: 44px;
+  background-image: var(--slot-icon-image, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.card-preview-linked.texture-porta::before {
+  background-image: var(--texture-image, none);
+}
+
+.card-marker.texture-lixo::before {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Lixo.png');
+  transform: scale(var(--texture-scale, 1));
+}
+
+.card-marker.texture-mapa-itens::before {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Mapa%20de%20itens.webp');
+  transform: scale(var(--texture-scale, 1));
+}
+
+.card-marker.card-no-border {
+  border: none;
+  background: transparent;
+}
+
+/* Trouble drop zone styles */
+.trouble-drop-zone {
+  border: 3px dashed #ff4444 !important;
+  background: rgba(255, 68, 68, 0.15) !important;
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 1000 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trouble-drop-zone.visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.trouble-drop-zone.drag-over {
+  border-color: #ff2222 !important;
+  background: rgba(255, 68, 68, 0.35) !important;
+  border-width: 4px !important;
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.5), inset 0 0 20px rgba(255, 68, 68, 0.3);
+}
+
+.trouble-drop-zone-content,
+.trouble-drop-content,
+.trouble-drop-content * {
+  pointer-events: none !important;
+  text-align: center;
+  color: #1f1409;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.trouble-drop-zone-content h3 {
+  margin: 0 0 10px 0;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.trouble-drop-zone-content p {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 68, 68, 0.6);
+  }
+}
+
+/* ── Zona de descarte (slots 79/80) ── */
+.discard-drop-zone {
+  border: 3px dashed #ff8c00 !important;
+  background: rgba(255, 140, 0, 0.15) !important;
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 1000 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.discard-drop-zone.visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: pulseGlowDiscard 2s ease-in-out infinite;
+}
+
+.discard-drop-zone.drag-over {
+  border-color: #ff6600 !important;
+  background: rgba(255, 140, 0, 0.35) !important;
+  border-width: 4px !important;
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.5), inset 0 0 20px rgba(255, 140, 0, 0.3);
+}
+
+.discard-drop-content,
+.discard-drop-content * {
+  pointer-events: none !important;
+  text-align: center;
+  color: #fff8e1;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+  font-weight: bold;
+}
+
+.discard-drop-hint {
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+@keyframes pulseGlowDiscard {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 140, 0, 0.6);
+  }
+}
+
+/* ── Zona de troca por nível (valor >= 1000) ── */
+.trade-level-zone {
+  border: 3px dashed #4caf50 !important;
+  background: rgba(76, 175, 80, 0.18) !important;
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 1000 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trade-level-zone.visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: pulseGlowTrade 2s ease-in-out infinite;
+}
+
+.trade-level-zone.drag-over {
+  border-color: #2e7d32 !important;
+  background: rgba(76, 175, 80, 0.35) !important;
+  border-width: 4px !important;
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.5), inset 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.trade-level-content {
+  pointer-events: none;
+  text-align: center;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+  font-weight: bold;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.trade-level-content p,
+.trade-level-content .trade-level-hint,
+.trade-level-content .trade-level-total {
+  pointer-events: none;
+}
+
+.trade-level-hint {
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.trade-level-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  max-height: 80px;
+  overflow-y: auto;
+  pointer-events: auto !important;
+}
+
+.trade-level-cards img {
+  width: 40px;
+  height: 56px;
+  object-fit: contain;
+  object-position: bottom;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.5);
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition: transform 0.15s;
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.trade-level-cards img:hover {
+  transform: scale(1.15);
+  border-color: #ff5252;
+}
+
+.trade-level-total {
+  font-size: 1.1em;
+  color: #ffeb3b;
+  margin: 2px 0;
+}
+
+.trade-level-total.reached {
+  color: #4caf50;
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+}
+
+.trade-level-buttons {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto !important;
+  margin-top: 2px;
+}
+
+.trade-level-btn {
+  padding: 5px 14px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: background 0.2s;
+}
+
+.trade-cancel-btn {
+  background: #d32f2f;
+  color: #fff;
+}
+
+.trade-cancel-btn:hover {
+  background: #b71c1c;
+}
+
+.trade-confirm-btn {
+  background: #388e3c;
+  color: #fff;
+}
+
+.trade-confirm-btn:hover {
+  background: #2e7d32;
+}
+
+@keyframes pulseGlowTrade {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(76, 175, 80, 0.6);
+  }
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+/* ===== BASE MODAL OVERLAY ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  z-index: 9500;
+}
+.modal.is-hidden {
+  display: none !important;
+}
+
+.legacy-field {
+  display: none !important;
+}
+
+.player-token {
+  --token-size: 52px;
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: var(--token-size);
+  height: var(--token-size);
+  transform: translate(-50%, -50%);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  z-index: 5;
+  pointer-events: auto;
+  transition: top 0.5s ease, left 0.5s ease;
+}
+
+.player-token img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: contain;
+  display: block;
+}
+
+.player-token-preview {
+  pointer-events: none;
+  z-index: 4;
+}
+
+.player-token-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.sim-players {
+  position: absolute;
+  inset: 2% 3% 2% 3%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  gap: var(--sim-gap, 6%);
+  align-items: center;
+  justify-items: center;
+  pointer-events: auto;
+  z-index: 2;
+  overflow: visible;
+}
+
+.sim-players img {
+  width: var(--sim-size, 100%);
+  height: var(--sim-size, 100%);
+  object-fit: contain;
+  display: block;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.sim-players img:nth-child(n+4) {
+  transform: translateY(calc(var(--sim-row-overlap, 0%) * -1));
+}
+
+.card-message {
+  border: none;
+  background: transparent;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px;
+  text-align: center;
+  box-shadow: none;
+  pointer-events: auto;
+  z-index: 50;
+}
+
+.card-message-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f7f2e6;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.card-message-action {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: linear-gradient(135deg, #ffd700 0%, #ffea70 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: auto;
+}
+
+.card-message-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.card-message-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card-message-option {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: linear-gradient(135deg, #ffd700 0%, #ffea70 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: auto;
+}
+
+.card-message-action:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+}
+
+.card-message-option:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+}
+
+.live-feed {
+  width: 100%;
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0 4px;
+  border-top: 1px solid rgba(255,215,0,0.18);
+  border-bottom: 1px solid rgba(255,215,0,0.18);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,215,0,0.3) transparent;
+}
+
+.live-feed-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(247,242,230,0.82);
+  text-align: left;
+  padding: 0 4px;
+  animation: feedSlideIn 0.25s ease;
+}
+
+.live-feed-item .feed-player {
+  font-weight: 700;
+  color: #ffd700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.live-feed-item .feed-action {
+  color: rgba(247,242,230,0.6);
+  flex-shrink: 0;
+}
+
+.live-feed-item .feed-card {
+  color: #e8d5a0;
+  font-style: italic;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@keyframes feedSlideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-message-action:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-message-option:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-message-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Spinner de carregamento dentro dos botões */
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(26, 26, 26, 0.3);
+  border-top-color: #1a1a1a;
+  border-radius: 50%;
+  animation: btnSpin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+
+.card-message-action.is-loading,
+.card-message-option.is-loading {
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.card-message-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+.fan-wrapper {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  transform: translate(-50%, -50%);
+  width: clamp(74px, 6vw, 100px);
+  aspect-ratio: 4 / 6;
+  --card-trans-duration: 1000ms;
+  --card-trans-easing: linear(0, 0.01 0.8%, 0.038 1.6%, 0.154 3.4%, 0.781 9.7%, 1.01 12.5%, 1.089 13.8%, 1.153 15.2%, 1.195 16.6%, 1.219 18%, 1.224 19.7%, 1.208 21.6%, 1.172 23.6%, 1.057 28.6%, 1.007 31.2%, 0.969 34.1%, 0.951 37.1%, 0.953 40.9%, 0.998 50.4%, 1.011 56%, 0.998 74.7%, 1);
+  --card-border-radius: 10px;
+  --card-width: 100%;
+  --radius: 9vmin;
+  --cards: 7;
+  --cards-safe: 7;
+  --arc-size: 0.25;
+  --arc-center: 0.75;
+  --arc-start: calc(var(--arc-center) - var(--arc-size) / 2);
+  --arc-shift: 0;
+  --arc-shift-delta: 0.01;
+  pointer-events: auto;
+  font-family: 'Crushed', 'Space Grotesk', system-ui, sans-serif;
+}
+
+.fan-wrapper.is-hidden {
+  display: none;
+}
+
+.fan-wrapper > div {
+  --arc-step: 0.035;
+  position: absolute;
+  width: var(--card-width);
+  aspect-ratio: 4 / 6;
+  background: transparent;
+  border-radius: 0;
+  offset-path: circle(var(--radius) at 50% 100%);
+  offset-distance: calc((var(--arc-center) + (var(--card-i) - (var(--cards) + 1) / 2) * var(--arc-step) + var(--arc-shift)) * 100%);
+  offset-rotate: auto;
+  offset-anchor: 50% 0%;
+  transition: all var(--card-trans-duration) var(--card-trans-easing);
+  box-shadow: none;
+}
+
+.fan-wrapper > div.fan-card-enter {
+  opacity: 0;
+  transform: translateY(12px) scale(0.92);
+  animation: fanCardEnter 0.42s ease forwards;
+}
+
+@keyframes fanCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes monsterDefeat {
+  0%   { transform: translate(-50%, -50%) scale(1)   rotateY(0deg);   opacity: 1; }
+  30%  { transform: translate(-50%, -50%) scale(0.8) rotateY(90deg);  opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(0.5) rotateY(0deg);   opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(0)   rotateY(0deg);   opacity: 0; }
+}
+
+.deal-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.deal-seed {
+  position: fixed;
+  width: 86px;
+  height: 128px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  box-shadow: 0 20px 34px rgba(0, 0, 0, 0.55);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  animation: dealSeedShrink 2s ease forwards;
+}
+
+.deal-seed.deal-seed-swap {
+  filter: saturate(1.15) brightness(1.05);
+}
+
+.deal-card {
+  position: fixed;
+  width: 72px;
+  height: 108px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  animation: dealCardFly 3s ease-out forwards;
+}
+
+@keyframes dealSeedShrink {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.15);
+    opacity: 0;
+  }
+}
+
+@keyframes dealCardFly {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+  }
+  20% {
+    opacity: 1;
+  }
+  45% {
+    transform: translate(calc(-50% + var(--burst-x, 0px)), calc(-50% + var(--burst-y, 0px))) scale(0.95);
+  }
+  100% {
+    opacity: 0.55;
+    transform: translate(calc(-50% + var(--deal-x)), calc(-50% + var(--deal-y))) scale(0.7);
+  }
+}
+
+.fan-wrapper > div:hover {
+  offset-anchor: 50% 10%;
+}
+
+
+.fan-wrapper > div:hover + div {
+  --arc-shift: calc(var(--arc-shift-delta) * 3);
+}
+
+.fan-wrapper > div:hover + div + div {
+  --arc-shift: calc(var(--arc-shift-delta) * 2);
+}
+
+.fan-wrapper > div:hover + div + div + div {
+  --arc-shift: calc(var(--arc-shift-delta) * 1);
+}
+
+.fan-wrapper > div:has(+ *:hover) {
+  --arc-shift: calc(var(--arc-shift-delta) * -3);
+}
+
+.fan-wrapper > div:has(+ * + *:hover) {
+  --arc-shift: calc(var(--arc-shift-delta) * -2);
+}
+
+.fan-wrapper > div:has(+ * + * + *:hover) {
+  --arc-shift: calc(var(--arc-shift-delta) * -1);
+}
+
+.fan-wrapper > div {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fan-wrapper > div > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  display: block;
+  border-radius: 0;
+  cursor: grab;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ícone do slot (Mini_card) no canto superior-esquerdo das cartas do leque */
+.fan-wrapper > div > .slot-icon {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 44px;
+  height: 44px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Nome da carta no leque */
+.fan-wrapper > div > .fan-card-name {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  font-family: 'Creepster', cursive;
+  font-size: 0.65em;
+  color: #000;
+  text-align: center;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+  width: 90%;
+  line-height: 1.15;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Badge de status da carta (forca, fuga, nivel, valor, pesado) */
+.card-stats-badge {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.card-stats-badge .stats-item {
+  display: none;
+  align-items: center;
+  gap: 1px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.5em;
+  font-weight: 600;
+  padding: 1px 2px;
+  border-radius: 3px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.card-stats-badge .stats-icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+/* Badge de stats no zoom preview ampliado */
+.fan-card-zoom-preview .card-stats-badge {
+  top: 6px;
+  right: 6px;
+  left: auto;
+  transform: none;
+  align-items: flex-end;
+  gap: 4px;
+}
+.fan-card-zoom-preview .card-stats-badge .stats-item {
+  display: flex;
+  position: relative;
+  font-size: 0.8em;
+  color: #000;
+  padding: 0;
+  border-radius: 4px;
+  gap: 0;
+  margin-top: 0;
+}
+.fan-card-zoom-preview .card-stats-badge .stats-icon {
+  width: 52px;
+  height: 52px;
+}
+.fan-card-zoom-preview .card-stats-badge .stats-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #000;
+  text-shadow: 0 0 3px rgba(255,255,255,0.9), 0 0 6px rgba(255,255,255,0.6);
+  pointer-events: none;
+}
+
+/* Badge de stats nos slots da cartela — posicionamento livre por cantos */
+.cartela-slot .card-stats-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: none;
+  display: block;
+  gap: 0;
+  pointer-events: none;
+}
+.cartela-slot .card-stats-badge .stats-item {
+  display: flex;
+  position: absolute;
+  font-size: 0.4em;
+  padding: 0;
+  border-radius: 2px;
+  margin: 0;
+}
+.cartela-slot .card-stats-badge .stats-icon {
+  width: 28px;
+  height: 28px;
+}
+.cartela-slot .card-stats-badge .stats-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #000;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+/* Força — superior direito */
+.cartela-slot .card-stats-badge .stats-forca {
+  top: 2px;
+  right: 2px;
+}
+/* Valor — inferior direito */
+.cartela-slot .card-stats-badge .stats-valor {
+  bottom: 2px;
+  right: 2px;
+}
+/* Fuga mínima — inferior esquerdo */
+.cartela-slot .card-stats-badge .stats-fuga {
+  bottom: 2px;
+  left: 0;
+}
+
+/* Ícone do slot no zoom/preview ampliado (3x do normal 22px) */
+.fan-card-zoom-preview .slot-icon-zoom {
+  position: absolute;
+  top: -5px;
+  left: -6px;
+  width: 130px;
+  height: 130px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+/* Ícone do slot nas cartas de combate */
+.combat-card-item > .slot-icon {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 28px;
+  height: 28px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+/* Ícone do slot nas cartas de troca */
+.trade-card-item > .slot-icon {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 36px;
+  height: 36px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+/* Ícone do slot nos thumbs de hand-limit */
+.hl-pending-thumb > .slot-icon {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 28px;
+  height: 28px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+/* Ícone do slot nas cartas de distribuição */
+.distribuicao-card > .slot-icon {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 36px;
+  height: 36px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+body.is-dragging-card * {
+  cursor: grabbing !important;
+}
+
+body.is-dragging-card .card-fan-preview {
+  opacity: 0 !important;
+}
+
+html, body {
+  overscroll-behavior: none;
+}
+
+.card-preview-linked.is-drop-over {
+  outline: 2px dashed rgba(255, 215, 0, 0.9);
+  outline-offset: 4px;
+}
+
+/* Slot aguardando resposta da requisição */
+.slot-loading {
+  pointer-events: none;
+  opacity: 0.65;
+  position: relative;
+}
+.slot-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  z-index: 25;
+  animation: slot-spin 0.7s linear infinite;
+}
+
+@keyframes slot-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Efeito de borda animada para slots permitidos */
+@property --slot-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes slotBorderAnimate {
+  0% {
+    --slot-angle: 0deg;
+  }
+  100% {
+    --slot-angle: 360deg;
+  }
+}
+
+.card-preview-linked.slot-drop-allowed {
+  box-shadow: 
+    0 0 0 3px #ff2770,
+    0 0 0 6px #45f3ff,
+    0 0 15px rgba(255, 39, 112, 0.6),
+    0 0 25px rgba(69, 243, 255, 0.4);
+  animation: slotPulse 1.5s ease-in-out infinite;
+}
+
+/* Overlay da carta modificadora empilhada no slot */
+.slot-modificador-overlay {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 44%;
+  height: 44%;
+  background-size: cover;
+  background-position: center;
+  border-radius: 4px;
+  border: 2px solid #45f3ff;
+  box-shadow: 0 0 6px rgba(69,243,255,0.7);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes slotPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 3px #ff2770,
+      0 0 0 6px #45f3ff,
+      0 0 15px rgba(255, 39, 112, 0.6),
+      0 0 25px rgba(69, 243, 255, 0.4);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 3px #45f3ff,
+      0 0 0 6px #ff2770,
+      0 0 20px rgba(69, 243, 255, 0.8),
+      0 0 35px rgba(255, 39, 112, 0.6);
+  }
+}
+
+
+.card-marker.card-draggable {
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+}
+
+.card-marker.card-fan-preview {
+  position: fixed !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  z-index: 10002;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) !important;
+  width: 280px !important;
+  height: 420px !important;
+  --scale-x: 1 !important;
+  --scale-y: 1 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
+  border: 3px solid rgba(255, 215, 0, 0.8);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Em batalha, o preview do monstro fica sempre visível (sobrepõe is-dragging-card) */
+body.battle-mode .card-marker.card-fan-preview,
+body.battle-mode.is-dragging-card .card-marker.card-fan-preview {
+  opacity: 1 !important;
+  pointer-events: none;
+}
+
+.card-marker.card-fan-preview {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.card-marker.card-fan-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--texture-image, none);
+  background-size: contain;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card-marker.card-fan-preview.is-active {
+  opacity: 1 !important;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+/* Elementos visuais do card-fan-preview (mesmos do fan-card-zoom-preview) */
+.card-fan-preview .zoom-card-name {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  pointer-events: none;
+  font-family: 'Creepster', cursive;
+  font-size: 1.1em;
+  color: #000;
+  text-align: center;
+  text-shadow: 0 0 4px rgba(255,255,255,0.9);
+  width: 85%;
+  line-height: 1.2;
+}
+.card-fan-preview .slot-icon-zoom {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 120px;
+  height: 120px;
+  z-index: 5;
+  pointer-events: none;
+  object-fit: contain;
+}
+.card-fan-preview .card-text-overlay {
+  display: block;
+  font-size: 10px;
+  padding: 8px 10px;
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+  max-height: 45%;
+  overflow-y: auto;
+  transform: none;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f0e6c8;
+  font-weight: 600;
+  line-height: 1.35;
+  text-shadow: none;
+  border-radius: 0 0 10px 10px;
+  white-space: pre-line;
+  z-index: 3;
+}
+.card-fan-preview .card-stats-badge {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  transform: translateY(-50%);
+  right: auto;
+  align-items: flex-start;
+  gap: 0;
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+.card-fan-preview .card-stats-badge .stats-item {
+  display: flex;
+  position: relative;
+  font-size: 0.8em;
+  color: #000;
+  padding: 0;
+  border-radius: 4px;
+  gap: 0;
+  margin-top: -30px;
+  background: transparent;
+}
+.card-fan-preview .card-stats-badge .stats-item:first-child {
+  margin-top: 0;
+}
+.card-fan-preview .card-stats-badge .stats-icon {
+  width: 70px;
+  height: 70px;
+}
+.card-fan-preview .card-stats-badge .stats-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #000;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+  pointer-events: none;
+}
+
+.card-marker.icon-bag {
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Mochila.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 120%;
+  background-color: transparent;
+}
+
+.card-marker.card-hover-target {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.card-marker.card-hover-preview {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.card-marker.card-hover-preview.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-marker.card-preview-linked {
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: grab;
+  transform-origin: center;
+}
+
+.card-marker.card-preview-linked.has-card:hover {
+    transform: scale(3);
+    z-index: 2001;
+}
+
+body.is-fan-hovering .card-marker.card-preview-linked.has-card:hover {
+  transform: none;
+  z-index: auto;
+}
+
+.card-marker.card-preview-linked.is-dragging {
+  transform: scale(1);
+  cursor: grabbing;
+  z-index: auto;
+}
+
+.card-marker.card-preview-linked:active {
+  cursor: grabbing;
+}
+
+.card-marker.card-hover-preview.is-active + .card-marker.card-preview-linked,
+.card-marker.card-hover-preview.is-active ~ .card-marker.card-preview-linked {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-marker.card-preview-linked.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-marker.card-hover-target:hover + .card-marker.card-hover-preview + .card-marker.card-preview-linked,
+.card-marker.card-hover-target:hover + .card-marker.card-hover-preview ~ .card-marker.card-preview-linked,
+.card-marker.card-hover-target:focus-visible + .card-marker.card-hover-preview + .card-marker.card-preview-linked,
+.card-marker.card-hover-target:focus-visible + .card-marker.card-hover-preview ~ .card-marker.card-preview-linked,
+.card-marker.card-hover-preview:hover + .card-marker.card-preview-linked,
+.card-marker.card-hover-preview:hover ~ .card-marker.card-preview-linked {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Cartela fixa na base (slots 77-89, 78L, 80L) */
+.cartela-bottom {
+  position: fixed;
+  left: auto;
+  right: 12px;
+  bottom: 12px;
+  transform: none;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  max-width: min(1040px, 92vw);
+  padding: 10px 12px;
+  background: rgba(10, 10, 10, 0.8);
+  border: 2px solid rgba(255, 215, 0, 0.65);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  gap: 10px;
+}
+
+.cartela-bottom-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 72px;
+  gap: 0;
+  width: auto;
+  justify-content: center;
+}
+
+.cartela-bottom-grid.is-hidden {
+  display: none;
+}
+
+/* Quando mostra só hub icons (sem slots), estilo compacto */
+.cartela-bottom.hub-only {
+  padding: 6px;
+  max-width: fit-content;
+}
+
+.cartela-hub-icons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.cartela-hub-icons.hidden {
+  display: none;
+}
+
+.cartela-hub-icons button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 0, 0.7);
+  background: rgba(20, 20, 20, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  position: relative;
+}
+
+.cartela-hub-icons button:hover {
+  transform: scale(1.12);
+  filter: brightness(1.2);
+}
+
+.cartela-hub-icons button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Overlays de nível e força no slot 79 */
+.slot79-overlay {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+}
+
+.slot79-nivel {
+  top: 2px;
+  left: 2px;
+}
+
+.slot79-forca {
+  top: 2px;
+  right: 2px;
+}
+
+.cartela-bottom .cartela-slot {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  width: 72px;
+  height: 108px;
+  opacity: 1;
+  pointer-events: auto;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  background: rgba(30, 30, 30, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+}
+
+.cartela-bottom .cartela-slot[data-card="79"] {
+  overflow: visible;
+}
+
+.cartela-bottom .cartela-slot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.cartela-bottom .cartela-slot::before {
+  border-radius: 8px;
+}
+
+/* Inverter horizontal apenas no slot 83 */
+.cartela-bottom .cartela-slot[data-card="83"]::before {
+  transform: scaleX(-1);
+}
+
+/* Nome da carta sobre os slots da cartela */
+.cartela-card-name {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  font-family: 'Creepster', cursive;
+  font-size: 0.55em;
+  color: #000;
+  text-align: center;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+  width: 90%;
+  line-height: 1.15;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.card-marker.card-hover-target:hover + .card-marker.card-hover-preview,
+.card-marker.card-hover-target:focus-visible + .card-marker.card-hover-preview {
+  opacity: 1;
+}
+
+.card-marker.card-draggable:active {
+  cursor: grabbing;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.65);
+}
+
+.deck-count {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translate(50%, -50%);
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.85);
+  border: 2px solid rgba(255, 215, 0, 0.9);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.resize-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.resize-handle.handle-width {
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.resize-handle.handle-height {
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.coord-readout {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+/* Cards não exibem rótulos; blocos funcionam apenas como áreas clicáveis/visuais */
+
+/* ========== SISTEMA DE AUTENTICAÇÃO ========== */
+.auth-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.auth-modal.active {
+  display: flex;
+}
+
+.auth-modal-content {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  max-width: 450px;
+  width: 90%;
+  border: 2px solid #ffd700;
+}
+
+.auth-modal-content h2 {
+  color: #ffd700;
+  text-align: center;
+  margin: 0 0 30px 0;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-form.hidden {
+  display: none;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label,
+.inline-field label {
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  border: 2px solid #555;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #ffd700;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn-primary {
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.form-error {
+  color: #ff4444;
+  text-align: center;
+  margin: 10px 0 0 0;
+  font-size: 0.9rem;
+  min-height: 20px;
+}
+
+.auth-toggle {
+  margin-top: 20px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #555;
+}
+
+.auth-toggle p {
+  color: #ccc;
+  margin: 0;
+}
+
+.auth-toggle a {
+  color: #ffd700;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.auth-toggle a:hover {
+  color: #ffed4e;
+  text-decoration: underline;
+}
+
+/* ========== ÍCONE DE MENU ========== */
+.menu-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  padding: 0;
+}
+
+.menu-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.8);
+}
+
+.menu-icon svg {
+  width: 60%;
+  height: 60%;
+  color: #1a1a1a;
+}
+
+.menu-icon .icon-stop {
+  display: none;
+}
+
+.menu-icon.hidden {
+  display: none;
+}
+
+.menu-hub {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-radius: 16px;
+  background: rgba(8, 8, 8, 0.55);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  backdrop-filter: blur(6px);
+  padding: 18px 12px;
+}
+
+.menu-hub.hidden {
+  display: none;
+}
+
+.battle-vs-hub {
+  display: none;
+}
+
+body.battle-mode .battle-vs-hub {
+  display: flex;
+}
+
+body.battle-mode #menuHubClone {
+  --x: 50% !important;
+  --y: 15% !important;
+}
+
+.menu-hub-horizontal {
+  flex-direction: row;
+}
+
+.menu-hub-avatar {
+  width: 85%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 0, 0.85);
+  background: rgba(8, 8, 8, 0.65);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.menu-hub-avatar.is-empty {
+  border-style: dashed;
+}
+
+.menu-hub-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.menu-hub-with-count {
+  position: relative;
+}
+
+.menu-hub-count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+#menuHubMonstroCount {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.menu-hub-avatar-plain {
+  width: 120%;
+  border: none;
+  background: transparent;
+}
+
+.menu-hub-avatar-plain img {
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.menu-hub-shield {
+  width: 95%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.menu-hub-shield img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.menu-hub-shield span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.menu-hub-bag {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.menu-hub-bag img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.card-marker.icon-bag .opponent-forca-value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0,0,0,0.7);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.menu-hub-historico {
+  width: 95%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.menu-hub-historico img,
+.menu-hub-trade img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.menu-hub-historico:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.menu-hub-trade {
+  width: 95%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.menu-hub-trade:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.menu-hub-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  box-shadow: 0 0 6px rgba(229,57,53,0.8);
+  animation: badge-pulse 1.2s ease-in-out infinite;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.menu-hub-badge.is-hidden {
+  display: none;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 6px rgba(229,57,53,0.8); }
+  50% { transform: scale(1.2); box-shadow: 0 0 12px rgba(229,57,53,1); }
+}
+
+/* ===== MODAL DE VITÓRIA ===== */
+.victory-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+.victory-modal.is-hidden {
+  display: none;
+}
+.victory-modal-content {
+  background: linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
+  border: 2px solid #f5c518;
+  border-radius: 20px;
+  padding: 44px 56px;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 0 80px rgba(245, 197, 24, 0.35), 0 20px 60px rgba(0,0,0,0.7);
+  animation: victoryPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes victoryPop {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.victory-title {
+  color: #f5c518;
+  font-size: 2.4rem;
+  margin: 0 0 18px;
+  text-shadow: 0 0 24px rgba(245, 197, 24, 0.7);
+}
+.victory-character {
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #f5c518;
+  box-shadow: 0 0 24px rgba(245, 197, 24, 0.45);
+  margin-bottom: 14px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.victory-winner-name {
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: bold;
+  margin: 0 0 6px;
+}
+.victory-winner-level {
+  color: #f5c518;
+  font-size: 1.05rem;
+  margin: 0 0 28px;
+  opacity: 0.9;
+}
+.victory-close-btn {
+  font-size: 1.05rem;
+  padding: 12px 44px;
+  cursor: pointer;
+}
+
+/* ===== MODAL DE PROPOSTAS ===== */
+/* ── Hand-limit modal ───────────────────────────────────── */
+.hand-limit-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 7000;
+}
+
+.hand-limit-modal.is-hidden {
+  display: none;
+}
+
+.hand-limit-modal-content {
+  background: rgba(15, 10, 5, 0.97);
+  border: 2px solid rgba(255, 160, 0, 0.7);
+  border-radius: 16px;
+  padding: 28px 32px 24px;
+  min-width: 340px;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95);
+  color: #f5e8c0;
+  text-align: center;
+}
+
+.hand-limit-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffcc44;
+  margin: 0;
+}
+
+.hand-limit-message {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #e0d0a0;
+  margin: 0;
+}
+
+.hand-limit-players-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+.hand-limit-player-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.hand-limit-target {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hand-limit-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 200, 80, 0.5);
+}
+
+.hand-limit-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #ffd966;
+}
+
+.hand-limit-drop-zone {
+  width: 100%;
+  min-height: 90px;
+  border: 2px dashed rgba(255, 180, 40, 0.55);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  font-size: 0.85rem;
+  color: rgba(255,220,120,0.7);
+  transition: border-color 0.2s, background 0.2s;
+  cursor: default;
+  box-sizing: border-box;
+}
+
+.hand-limit-drop-zone.drag-over {
+  border-color: #ffcc44;
+  background: rgba(255, 200, 60, 0.12);
+  color: #ffcc44;
+}
+
+.hand-limit-discard-zone {
+  border-color: rgba(255, 120, 30, 0.7) !important;
+  color: rgba(255, 180, 80, 0.85) !important;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 110px;
+}
+
+.hand-limit-discard-zone.drag-over {
+  border-color: #ff7820 !important;
+  background: rgba(255, 130, 20, 0.18) !important;
+  color: #ffaa50 !important;
+  box-shadow: 0 0 16px rgba(255, 120, 20, 0.4);
+}
+
+.hand-limit-discard-hint {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.hand-limit-counter {
+  font-size: 0.92rem;
+  color: #a8d8a8;
+  margin: 0;
+}
+
+/* Thumbnails acumulados nas zonas de drop */
+.hl-pending-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+}
+
+.hl-pending-thumb {
+  position: relative;
+  width: 56px;
+  height: 80px;
+  flex-shrink: 0;
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.hl-pending-thumb img {
+  width: 56px;
+  height: 80px;
+  object-fit: contain;
+  object-position: bottom;
+  border-radius: 5px;
+  pointer-events: none;
+  display: block;
+}
+
+.hl-remove-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+  line-height: 18px;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+  font-weight: 700;
+}
+
+.hl-remove-btn:hover {
+  background: #e74c3c;
+}
+
+/* Botão confirmar */
+.hand-limit-confirm-btn {
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #2a6e2a, #3a9e3a);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.hand-limit-confirm-btn.is-hidden {
+  display: none;
+}
+
+.hand-limit-confirm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hand-limit-confirm-btn:not(:disabled):hover {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+.proposals-modal {
+  position: fixed;
+  right: 2%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 520px;
+  max-height: 80vh;
+  background: rgba(10, 10, 10, 0.97);
+  border: 2px solid rgba(255, 200, 0, 0.6);
+  border-radius: 14px;
+  z-index: 6000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+  overflow: hidden;
+}
+
+.proposals-modal.is-hidden {
+  display: none;
+}
+
+.proposals-modal-header {
+  padding: 12px 16px;
+  border-bottom: 2px solid rgba(255,200,0,0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.proposals-modal-header h3 {
+  color: #ffd700;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.proposals-list {
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.proposals-empty {
+  color: #888;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.9rem;
+}
+
+.proposal-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,200,0,0.3);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proposal-item.is-sent {
+  border-color: rgba(100,180,255,0.4);
+}
+
+.proposal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.proposal-from {
+  color: #ffd700;
+  font-weight: 700;
+}
+
+.proposal-from.sent-label {
+  color: #64b4ff;
+}
+
+.proposal-date {
+  color: #666;
+  font-size: 0.72rem;
+}
+
+.proposal-cards {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+.proposal-card-img {
+  width: 80px !important;
+  height: 115px !important;
+  max-width: 80px !important;
+  max-height: 115px !important;
+  min-width: 80px !important;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  object-fit: contain !important;
+  background: #1a1a1a;
+  flex-shrink: 0;
+  display: block;
+}
+
+.proposal-card-placeholder {
+  width: 80px !important;
+  height: 115px !important;
+  min-width: 80px;
+  border-radius: 6px;
+  border: 1px dashed rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 1.4rem;
+}
+
+.proposal-arrow {
+  color: #ffd700;
+  font-size: 1.4rem;
+}
+
+.proposal-message {
+  font-size: 0.78rem;
+  color: #aaa;
+  font-style: italic;
+  text-align: center;
+}
+
+.proposal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-accept {
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.btn-accept:hover { filter: brightness(1.2); }
+
+.btn-decline {
+  background: linear-gradient(135deg, #b71c1c, #e53935);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.btn-decline:hover { filter: brightness(1.2); }
+
+.historico-list {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.historico-item {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.historico-item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.historico-item-body {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.historico-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.historico-origem {
+  background: #FF9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.historico-nome-carta {
+  color: #1976D2;
+  font-weight: bold;
+}
+
+.historico-jogador {
+  color: #fff;
+}
+
+.historico-item-acao {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 4px;
+  margin-right: 6px;
+}
+
+.historico-item-acao.sorteada {
+  background: #9C27B0;
+  color: white;
+}
+
+.historico-item-acao.distribuida {
+  background: #4CAF50;
+  color: white;
+}
+
+.historico-item-acao.mochila {
+  background: #2196F3;
+  color: white;
+}
+
+.historico-item-acao.descarte {
+  background: #f44336;
+  color: white;
+}
+
+.historico-item-acao.cartela {
+  background: #607D8B;
+  color: white;
+}
+
+.historico-combate {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.historico-combate.vitoria {
+  background: #4CAF50;
+  color: white;
+}
+
+.historico-combate.derrota {
+  background: #f44336;
+  color: white;
+}
+
+.historico-combate.fuga {
+  background: #FFC107;
+  color: #333;
+}
+
+.historico-tesouros {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 4px;
+  background: #FFD700;
+  color: #333;
+}
+
+.historico-nome-carta {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+.historico-nome-carta:hover {
+  color: #FFD700;
+}
+
+.historico-nome-carta-oculta {
+  color: #999;
+  font-style: italic;
+  cursor: default;
+  text-decoration: none;
+}
+
+.historico-item-timestamp {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 6px;
+}
+
+/* ===== CARD DE HISTÓRICO ===== */
+.historico-card {
+  position: fixed;
+  left: -400px;
+  top: 80px;
+  width: 380px;
+  max-height: calc(100vh - 100px);
+  background: #1a1a2e;
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  z-index: 10100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: left 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.historico-card.visible {
+  left: 10px;
+  box-shadow: 0 15px 50px rgba(255, 215, 0, 0.3);
+}
+
+.historico-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 2px solid #ffd700;
+  background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+  flex-shrink: 0;
+}
+
+.historico-card-header h3 {
+  margin: 0;
+  color: #ffd700;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.historico-close {
+  background: transparent;
+  border: none;
+  color: #ffd700;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.historico-close:hover {
+  color: #fff;
+  transform: scale(1.2);
+  text-shadow: 0 0 10px #ffd700;
+}
+
+.historico-card .historico-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  gap: 8px;
+}
+
+.historico-card .historico-item {
+  background: #0f3460;
+  border: 1px solid #ffd700;
+  color: #e0e0e0;
+}
+
+.historico-card .historico-item-header {
+  color: #ffd700;
+}
+
+.historico-card .historico-item-body {
+  color: #b0b0b0;
+}
+
+.historico-card .historico-nome-carta {
+  color: #ffd700;
+}
+
+.historico-card .historico-nome-carta:hover {
+  color: #fff;
+  text-shadow: 0 0 8px #ffd700;
+}
+
+.battle-vs-card {
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 1000;
+  transform: translate(-50%, -50%) rotate(var(--rotation, 0deg));
+}
+
+.battle-vs-icons {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 6%;
+}
+
+.battle-vs-icon {
+  width: 42%;
+  height: 90%;
+  object-fit: contain;
+  display: block;
+}
+
+.battle-vs-icon-x {
+  width: 20%;
+  height: 70%;
+}
+
+.bag-modal {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(5, 5, 5, 0.65);
+  border: 2px solid rgba(255, 215, 0, 0.55);
+  border-radius: 14px;
+  z-index: 2000;
+}
+
+.bag-modal.is-hidden {
+  display: none;
+}
+
+/* Modal de mochila do oponente (lado direito) */
+.bag-modal.opponent-bag-modal {
+  border: none;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.bag-modal.opponent-bag-modal:active {
+  cursor: grabbing;
+}
+
+.opponent-bag-player-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 10px;
+}
+
+.bag-modal-grid {
+  width: 92%;
+  height: 92%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-content: start;
+  justify-items: center;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  scrollbar-width: thin;
+}
+
+.opponent-bag-modal .bag-modal-grid {
+  margin-top: 200px;
+}
+
+.bag-modal-card {
+  background: rgba(10, 10, 10, 0.65);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  width: var(--bag-card-width, 70px);
+  height: var(--bag-card-height, 100px);
+  background-image: var(--bag-card-image, none);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffd700;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bag-modal-card.has-card {
+  background-image: var(--bag-card-image, none), url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: contain, cover;
+  background-position: center bottom, center;
+  background-repeat: no-repeat, no-repeat;
+  position: relative;
+}
+
+/* Ícone do slot (Mini_card) no canto superior-esquerdo dos cards da mochila */
+.bag-modal-card.has-card::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 36px;
+  height: 36px;
+  background-image: var(--slot-icon-image, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bag-modal-card.has-card span {
+  opacity: 0.1;
+}
+
+/* ===== ESTILOS DO MODAL DE TROCA ===== */
+.bag-modal-header-top {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.bag-modal-header-top h3 {
+  color: #ffd700;
+  margin: 0;
+  font-size: 14px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.btn-trade {
+  background: rgba(255, 100, 100, 0.7);
+  border: 1px solid rgba(255, 100, 100, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  z-index: 100;
+  position: relative;
+}
+
+.btn-trade:hover {
+  background: rgba(255, 100, 100, 0.9);
+  box-shadow: 0 4px 12px rgba(255, 100, 100, 0.5);
+}
+
+.trade-modal {
+  position: fixed;
+  right: 2%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 700px;
+  max-height: 85vh;
+  background: rgba(10, 10, 10, 0.95);
+  border: 3px solid rgba(255, 100, 100, 0.7);
+  border-radius: 15px;
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+}
+
+.trade-modal.is-hidden {
+  display: none;
+}
+
+.trade-modal-header {
+  padding: 15px;
+  border-bottom: 2px solid rgba(255, 100, 100, 0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trade-modal-header h3 {
+  color: #ffd700;
+  margin: 0;
+  font-size: 18px;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #ffd700;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #ff6464;
+  transform: scale(1.2);
+}
+
+.trade-modal-body {
+  flex: 1;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 50px 1fr;
+  gap: 20px;
+  overflow-y: auto;
+  align-items: start;
+}
+
+.trade-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 200px;
+}
+
+.trade-section label {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 12px;
+  text-align: center;
+}
+
+.trade-card-slot {
+  min-height: 250px;
+  border: 3px dashed rgba(255, 215, 0, 0.5);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: rgba(20, 20, 20, 0.8);
+  color: rgba(255, 215, 0, 0.6);
+  font-size: 11px;
+  text-align: center;
+  padding: 10px;
+  transition: all 0.2s ease;
+  cursor: grab;
+  align-content: start;
+}
+
+.trade-card-slot:hover {
+  border-color: rgba(255, 215, 0, 0.8);
+  background: rgba(30, 30, 30, 0.9);
+}
+
+.trade-card-item {
+  width: 100%;
+  height: 140px;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trade-card-item:hover {
+  border-color: rgba(255, 215, 0, 0.7);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.trade-card-item .remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(200, 50, 50, 0.8);
+  border: none;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.trade-card-item:hover .remove-btn {
+  opacity: 1;
+}
+
+.trade-card-item .remove-btn:hover {
+  background: rgba(200, 50, 50, 1);
+}
+
+.trade-card-slot.has-card {
+  border-style: solid;
+  border-color: rgba(255, 215, 0, 0.8);
+}
+
+.trade-card-slot.drag-over {
+  border-color: rgba(255, 100, 100, 0.9);
+  background: rgba(255, 100, 100, 0.2);
+}
+
+.trade-arrow {
+  font-size: 28px;
+  color: #ffd700;
+  font-weight: bold;
+  display: flex;
+  align-items: start;
+  margin-top: 25px;
+  justify-content: center;
+}
+
+.trade-modal-footer {
+  padding: 15px;
+  border-top: 2px solid rgba(255, 100, 100, 0.5);
+  display: flex;
+  gap: 10px;
+}
+
+#tradeMessageInput {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 6px;
+  color: #ffd700;
+  font-size: 12px;
+}
+
+#tradeMessageInput::placeholder {
+  color: rgba(255, 215, 0, 0.3);
+}
+
+.btn-confirm, .btn-cancel {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-confirm {
+  background: rgba(100, 200, 100, 0.7);
+  border-color: rgba(100, 200, 100, 0.9);
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: rgba(100, 200, 100, 0.9);
+  box-shadow: 0 4px 12px rgba(100, 200, 100, 0.5);
+}
+
+.btn-cancel {
+  background: rgba(200, 100, 100, 0.7);
+  border-color: rgba(200, 100, 100, 0.9);
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: rgba(200, 100, 100, 0.9);
+  box-shadow: 0 4px 12px rgba(200, 100, 100, 0.5);
+}
+
+.bag-card-zoom-preview {
+  position: fixed;
+  pointer-events: none;
+  z-index: 3000;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 3px solid rgba(255, 215, 0, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
+  animation: zoomIn 0.2s ease-out;
+}
+
+.fan-card-zoom-preview {
+  position: fixed;
+  pointer-events: none;
+  z-index: 30000;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 3px solid rgba(255, 215, 0, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
+  animation: zoomIn 0.2s ease-out;
+  overflow: hidden;
+}
+
+/* Nome da carta na preview expandida */
+.fan-card-zoom-preview .zoom-card-name {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  pointer-events: none;
+  font-family: 'Creepster', cursive;
+  font-size: 1.1em;
+  color: #000;
+  text-align: center;
+  text-shadow: 0 0 4px rgba(255,255,255,0.9);
+  width: 85%;
+  line-height: 1.2;
+}
+
+.fan-card-zoom-preview .card-text-overlay {
+  display: block;
+  font-size: 10px;
+  padding: 8px 10px;
+  /* Sobrescrever posicionamento padrão para aparecer na base da carta */
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+  max-height: 45%;
+  overflow-y: auto;
+  transform: none;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f0e6c8;
+  font-weight: 600;
+  line-height: 1.35;
+  text-shadow: none;
+  border-radius: 0 0 10px 10px;
+  white-space: pre-line;
+  z-index: 3;
+}
+
+@keyframes spinAnim {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.character-badge {
+  position: fixed;
+  top: 20px;
+  right: 175px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 215, 0, 0.75);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  color: #ffd700;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.character-badge.hidden {
+  display: none;
+}
+
+.character-badge img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 215, 0, 0.85);
+  background: #111;
+}
+
+.character-badge-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .character-badge {
+    right: 160px;
+  }
+}
+
+@media (max-width: 640px) {
+  .character-badge {
+    top: 90px;
+    right: 20px;
+  }
+}
+
+/* ========== BOTAO RAPIDO INICIAR JOGO ========== */
+.quick-start-btn {
+  right: 95px;
+  background: linear-gradient(135deg, #35c46a 0%, #56e082 100%);
+  box-shadow: 0 4px 15px rgba(53, 196, 106, 0.6);
+}
+
+.quick-start-btn.is-stop {
+  background: linear-gradient(135deg, #e45151 0%, #ff7a7a 100%);
+  box-shadow: 0 4px 15px rgba(228, 81, 81, 0.6);
+}
+
+.quick-start-btn.is-stop:hover {
+  box-shadow: 0 6px 20px rgba(228, 81, 81, 0.85);
+}
+
+.quick-start-btn.is-stop .icon-play {
+  display: none;
+}
+
+.quick-start-btn.is-stop .icon-stop {
+  display: block;
+}
+
+.quick-start-btn:hover {
+  box-shadow: 0 6px 20px rgba(53, 196, 106, 0.85);
+}
+
+.quick-start-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ========== MODAL DE MENU ========== */
+.menu-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 20000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.menu-modal.active {
+  display: flex;
+}
+
+.menu-modal-content {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  max-width: 500px;
+  width: 90%;
+  border: 2px solid #ffd700;
+  position: relative;
+}
+
+.menu-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.menu-modal .character-badge {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+}
+
+.menu-modal .menu-icon.quick-start-btn {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  width: 52px;
+  height: 52px;
+}
+
+.menu-modal-content h2 {
+  color: #ffd700;
+  text-align: center;
+  margin: 0 0 30px 0;
+  font-size: 2rem;
+  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+}
+
+.status-modal-content h2 {
+  margin-bottom: 20px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.status-card {
+  background: rgba(8, 8, 8, 0.6);
+  border: 2px solid rgba(255, 215, 0, 0.55);
+  border-radius: 14px;
+  padding: 16px 18px;
+  text-align: center;
+}
+
+.status-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #f7f2e6;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffd700;
+}
+
+.menu-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #ffd700;
+  font-size: 2.5rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.3s ease;
+  padding: 0;
+}
+
+.menu-close:hover {
+  color: #ffed4e;
+}
+
+.menu-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.menu-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 215, 0, 0.45);
+  background: rgba(15, 15, 15, 0.7);
+  grid-column: span 2;
+}
+
+.menu-switcher label {
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.menu-switcher-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.menu-switcher-actions select {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-btn.menu-btn-compact {
+  padding: 10px 16px;
+  font-size: 0.95rem;
+}
+
+.sim-account-list {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sim-account-list h3 {
+  margin: 0;
+  color: #ffd700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sim-account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7f2e6;
+}
+
+.sim-account-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sim-account-action {
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.7);
+  color: #ffd700;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.sim-account-action:hover {
+  background: rgba(255, 215, 0, 0.2);
+}
+
+.menu-btn {
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 237, 78, 0.1) 100%);
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.menu-btn svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.menu-btn:active {
+  transform: translateY(0);
+}
+
+.menu-btn.logout-btn {
+  margin-top: 10px;
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.menu-btn.simulador-ativo {
+  background: linear-gradient(135deg, rgba(0, 255, 128, 0.15) 0%, rgba(0, 200, 100, 0.15) 100%);
+  border-color: #00e070;
+  color: #00e070;
+}
+
+.menu-btn.simulador-ativo:hover {
+  background: linear-gradient(135deg, #00e070 0%, #00b858 100%);
+  color: #1a1a1a;
+  box-shadow: 0 6px 20px rgba(0, 224, 112, 0.4);
+}
+
+
+.menu-btn.logout-btn:hover {
+  background: linear-gradient(135deg, #ff4444 0%, #ff6666 100%);
+  color: #fff;
+  border-color: #ff4444;
+  box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+}
+
+.character-modal {
+  max-width: 1450px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.character-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(100px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1200px) {
+  .character-grid {
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .character-grid {
+    grid-template-columns: repeat(5, minmax(100px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .character-grid {
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+  }
+}
+
+.character-card {
+  background: rgba(255, 215, 0, 0.08);
+  border: 2px solid rgba(255, 215, 0, 0.35);
+  border-radius: 14px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  color: #ffd700;
+}
+
+.character-card img {
+  width: 100%;
+  max-width: 120px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
+}
+
+.character-card span {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.character-card.is-selected {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: #ffd700;
+  box-shadow: 0 10px 24px rgba(255, 215, 0, 0.25);
+}
+
+.user-info {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #555;
+  text-align: center;
+  color: #ccc;
+  font-size: 0.95rem;
+}
+
+.user-info strong {
+  color: #ffd700;
+}
+
+/* ========== MODAL DE CRIAR SALA ========== */
+.form-group select,
+.inline-field select {
+  padding: 12px 16px;
+  border: 2px solid #555;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.form-group select:focus,
+.inline-field select:focus {
+  outline: none;
+  border-color: #ffd700;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.form-group select option,
+.inline-field select option {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.room-success {
+  text-align: center;
+}
+
+.room-success.hidden {
+  display: none;
+}
+
+.room-success h3 {
+  color: #4caf50;
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+}
+
+.room-code-display {
+  margin: 20px 0;
+}
+
+.room-code-display p {
+  color: #ccc;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
+
+.code-box {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #1a1a1a;
+  font-size: 2.5rem;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 12px;
+  letter-spacing: 8px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+  margin: 0 auto;
+  max-width: 300px;
+}
+
+.room-info {
+  color: #ccc;
+  margin: 20px 0;
+  font-size: 0.95rem;
+}
+
+/* ========== MODAL DE SALA ABERTA ========== */
+.room-details {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.players-list {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #555;
+}
+
+.players-list h3 {
+  color: #ffd700;
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+}
+
+#playersList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.player-item.online {
+  border-color: #4caf50;
+}
+
+.player-item.offline {
+  border-color: #ff4444;
+  opacity: 0.7;
+}
+
+.player-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.player-status.online {
+  background: #4caf50;
+  box-shadow: 0 0 10px #4caf50;
+}
+
+.player-status.offline {
+  background: #ff4444;
+}
+
+.player-name {
+  color: #fff;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.player-name.offline {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.player-slot {
+  color: #ffd700;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.room-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.room-actions .btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.room-actions .btn-primary svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========== MODAL DE ENTRAR EM SALA ========== */
+.rooms-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rooms-list-container h3 {
+  color: #ffd700;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.available-rooms {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.available-rooms::-webkit-scrollbar {
+  width: 8px;
+}
+
+.available-rooms::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.available-rooms::-webkit-scrollbar-thumb {
+  background: #ffd700;
+  border-radius: 4px;
+}
+
+.room-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.room-card:hover {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.room-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.room-card-name {
+  color: #ffd700;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.room-card-code {
+  background: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.room-card-info {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.or-divider {
+  text-align: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #555;
+}
+
+.or-divider::before {
+  left: 0;
+}
+
+.or-divider::after {
+  right: 0;
+}
+
+.or-divider span {
+  color: #999;
+  background: #2d2d2d;
+  padding: 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.empty-rooms-message {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+/* ========== CONFIGURAÇÃO E EDIÇÃO DE CARTAS ========== */
+
+#configModal,
+#cardTypeModal,
+#categoryModal,
+#cardListModal,
+#editCardModal,
+#helpModal,
+#propostaAjudaModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 20000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+#configModal.active,
+#cardTypeModal.active,
+#categoryModal.active,
+#cardListModal.active,
+#editCardModal.active,
+#helpModal.active,
+#propostaAjudaModal.active {
+  display: flex !important;
+}
+
+#configModal .modal-content,
+#cardTypeModal .modal-content,
+#categoryModal .modal-content,
+#cardListModal .modal-content,
+#editCardModal .modal-content {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  max-width: 600px;
+  width: 90%;
+  border: 2px solid #ffd700;
+  position: relative;
+}
+
+#configModal .modal-content h2,
+#cardTypeModal .modal-content h2,
+#categoryModal .modal-content h2,
+#cardListModal .modal-content h2,
+#editCardModal .modal-content h2 {
+  color: #ffd700;
+  text-align: center;
+  margin: 0 0 30px 0;
+  font-size: 2rem;
+  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #ffd700;
+  font-size: 2.5rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.3s ease;
+  padding: 0;
+}
+
+.modal-back {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.7);
+  color: #ffd700;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-back:hover {
+  background: rgba(255, 215, 0, 0.25);
+}
+
+.modal-close:hover {
+  color: #ffed4e;
+}
+
+.config-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px 0;
+}
+
+.config-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.config-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.config-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.card-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  padding: 20px 0;
+}
+
+.card-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-type-icon {
+  font-size: 48px;
+}
+
+.card-type-btn:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.category-btn {
+  padding: 20px 15px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+}
+
+#editCardModal .modal-content.large {
+  max-width: 1200px;
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+.modal-content.large {
+  max-width: 1000px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content.large h2 {
+  flex-shrink: 0;
+}
+
+.card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  padding: 20px 0;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.card-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.card-list::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.card-list::-webkit-scrollbar-thumb {
+  background: #ffd700;
+  border-radius: 4px;
+}
+
+.card-list::-webkit-scrollbar-thumb:hover {
+  background: #ffed4e;
+}
+
+.card-item {
+  display: flex;
+  flex-direction: column;
+  background: #2d2d2d;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.card-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.card-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-item-info {
+  padding: 12px;
+  color: white;
+}
+
+.card-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.card-item-type {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Edição de Carta */
+.edit-card-container {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 30px;
+  align-items: start;
+  max-height: none;
+  overflow: visible;
+}
+
+.edit-card-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+}
+
+.edit-card-title {
+  color: #ffd700;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+}
+
+.edit-card-image-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-card-text-overlay {
+  position: absolute;
+  left: 11%;
+  right: 11%;
+  top: 21%;
+  height: 18%;
+  padding: 10px 12px;
+  transform: rotate(1.6deg);
+  transform-origin: center;
+  color: #1f1409;
+  font-size: 0.57rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+  white-space: pre-line;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.15), 0 2px 6px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card-text-overlay {
+  position: absolute;
+  left: 11%;
+  right: 11%;
+  top: 21%;
+  height: 18%;
+  padding: 4px 6px;
+  transform: rotate(1.6deg);
+  transform-origin: center;
+  color: #1f1409;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  white-space: pre-line;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.18), 0 2px 6px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+
+.cartela-bottom .cartela-slot.has-card:hover .card-text-overlay {
+  display: block;
+}
+
+.card-marker.card-preview-linked.has-card:hover .card-text-overlay {
+  display: block;
+}
+
+/* Mostrar nome do monstro na carta central durante o combate */
+.battle-mode .card-marker[data-card="15-preview"].is-active .card-text-overlay {
+  display: block;
+  font-size: 10px;
+  z-index: 10003;
+}
+
+.edit-card-preview img {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.edit-card-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.8);
+  background: rgba(8, 8, 8, 0.7);
+  color: #ffd700;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  z-index: 3;
+}
+
+.edit-card-nav:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+.edit-card-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.edit-card-nav-prev {
+  left: -12px;
+}
+
+.edit-card-nav-next {
+  right: -12px;
+}
+
+.edit-card-preview p {
+  color: #ffd700;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+.edit-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: calc(85vh - 110px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  align-self: start;
+  width: 100%;
+}
+
+.edit-card-form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.edit-card-form::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+.edit-card-form::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+.edit-card-form::-webkit-scrollbar-thumb:hover {
+  background: #ffd700;
+}
+
+.edit-card-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.edit-card-fields-grid .form-group {
+  display: none;
+}
+
+.edit-card-fields-grid .form-group.show-basic,
+.edit-card-fields-grid .equipar-group {
+  display: block;
+}
+
+.edit-card-fields-grid.is-hidden {
+  display: none;
+}
+
+.treasure-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.treasure-fields-grid .form-group {
+  display: none;
+}
+
+.treasure-fields-grid .form-group.show-basic,
+.treasure-fields-grid .equipar-group {
+  display: block;
+}
+
+.treasure-fields-grid .form-group.keep-basic {
+  display: block;
+}
+
+.treasure-fields-grid .span-2 {
+  grid-column: span 2;
+}
+
+.treasure-right-panel {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.equipar-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  border-radius: 10px;
+  background: transparent;
+  border: 0;
+  position: static;
+  min-height: auto;
+}
+
+.equipar-checkboxes.equipar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+textarea#editTextoCarta {
+  width: 100%;
+  resize: vertical;
+  min-height: 44px;
+  max-height: 64px;
+  background: #0f0f0f;
+  color: #ffffff;
+  line-height: 1.25;
+  caret-color: #ffd700;
+}
+
+.equipar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+
+.align-end {
+  display: flex;
+  align-items: flex-end;
+}
+
+
+.equipar-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f1c6;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
+  user-select: none;
+  touch-action: none;
+}
+
+.equipar-checkbox .equipar-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.equipar-checkbox .equipar-icon.is-flipped {
+  transform: scaleX(-1);
+}
+
+.equipar-checkboxes.is-locked .equipar-checkbox {
+  cursor: default;
+}
+
+.equipar-checkbox.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+.equipar-checkbox input {
+  accent-color: #3ebf5a;
+}
+
+.equipar-checkbox input:checked + span {
+  color: #8dff9f;
+}
+
+.equipar-readout {
+  display: none;
+}
+
+.treasure-fields-grid.is-hidden {
+  display: none;
+}
+
+/* Seção Armadilha */
+.armadilha-section {
+  margin-top: 20px;
+  padding: 16px;
+  border: 2px solid #c0392b;
+  border-radius: 8px;
+  background: rgba(192, 57, 43, 0.06);
+}
+
+.armadilha-section.is-hidden {
+  display: none;
+}
+
+.armadilha-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #c0392b;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.armadilha-section .form-group {
+  margin-bottom: 12px;
+}
+
+.armadilha-section .form-group.is-hidden {
+  display: none;
+}
+
+/* Highlight quando arrastar armadilha sobre ícone de jogador */
+.armadilha-drop-over {
+  outline: 3px solid #ff4444 !important;
+  outline-offset: 2px;
+  filter: brightness(1.4) drop-shadow(0 0 8px #ff4444) !important;
+  cursor: crosshair !important;
+}
+
+.armadilha-nova-regra-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.armadilha-nova-regra-row input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.btn-nova-regra {
+  padding: 6px 14px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.btn-nova-regra:hover {
+  background: #a93226;
+}
+
+.edit-card-fields-grid .form-group.span-3 {
+  grid-column: span 3;
+}
+
+.edit-card-fields-grid .form-group.span-2 {
+  grid-column: span 2;
+}
+
+.edit-card-fields-grid .form-group.span-4 {
+  grid-column: span 4;
+}
+
+.contra-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  grid-column: span 4;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.form-row.form-row-3 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-group input[type="number"],
+.form-group input[type="text"],
+.form-group select,
+.form-group textarea {
+  background: #1a1a1a;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 10px;
+  color: white;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input[type="number"]:focus,
+.form-group input[type="text"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+  caret-color: #ffd700;
+}
+
+.contra-hidden {
+  display: none;
+}
+
+.contra-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.contra-add {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border: none;
+  color: #081018;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contra-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(79, 172, 254, 0.35);
+}
+
+.contra-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.contra-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f1c6;
+  font-size: 13px;
+}
+
+.contra-remove {
+  border: none;
+  background: rgba(244, 67, 54, 0.2);
+  color: #ff8a80;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.contra-remove:hover {
+  background: rgba(244, 67, 54, 0.35);
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.edit-card-preview .form-actions {
+  justify-content: center;
+  width: 100%;
+}
+
+.btn-save,
+.btn-cancel {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: white;
+}
+
+.btn-save.is-loading {
+  color: transparent;
+  pointer-events: none;
+  position: relative;
+}
+
+.btn-save.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  margin-top: -9px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+}
+
+.btn-cancel {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+}
+
+.btn-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(244, 67, 54, 0.4);
+}
+
+@media (max-width: 768px) {
+  .edit-card-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .edit-card-preview {
+    position: static;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-card-fields-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .edit-card-fields-grid .form-group.span-3 {
+    grid-column: auto;
+  }
+
+  .edit-card-fields-grid .form-group.span-2 {
+    grid-column: auto;
+  }
+
+  .edit-card-fields-grid .form-group.span-4 {
+    grid-column: auto;
+  }
+
+  .contra-row {
+    grid-template-columns: 1fr;
+    grid-column: auto;
+  }
+
+  .form-row.form-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .contra-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== CARD TRANSFER SPINNER ========== */
+.card-transfer-spinner {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.card-transfer-spinner.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.spinner {
+  width: 80px;
+  height: 80px;
+  border: 4px solid rgba(255, 215, 0, 0.2);
+  border-top: 4px solid #ffd700;
+  border-right: 4px solid #ffed4e;
+  border-radius: 50%;
+  animation: spinnerRotate 1s linear infinite;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+@keyframes spinnerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-text {
+  color: #ffd700;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+/* ============================================================================
+   ZONAS DE COMBATE (INLINE)
+   ============================================================================ */
+
+.combat-drop-zone {
+  border: 3px dashed #666;
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  transition: all 0.3s ease;
+  pointer-events: auto;
+}
+
+.combat-drop-zone.drag-over {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.combat-drop-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.combat-zone-hint {
+  text-align: center;
+  color: #ffd700;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.combat-cards-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+
+.combat-card-item {
+  position: relative;
+  width: 50px;
+  height: 70px;
+  background-image: url('https://lrprmgvyggklrmrwhiai.supabase.co/storage/v1/object/public/munchkin-assets/Fundo%20da%20pagina/Fundo%20porta.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.combat-card-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  border-radius: 5px;
+  border: 2px solid #ffd700;
+}
+
+.combat-card-item-remove {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.combat-card-item-remove:hover {
+  background: #ff6666;
+  transform: scale(1.2);
+}
+
+/* ============================================================================
+   DADO DE COMBATE
+   ============================================================================ */
+
+/* ===== OVERLAY DOS DADOS ===== */
+.dice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.60);
+  backdrop-filter: blur(3px);
+  pointer-events: auto;
+}
+
+.dice-overlay.is-hidden {
+  display: none;
+}
+
+.dice-overlay-inner {
+  display: flex;
+  gap: 64px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.dice-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.dice-label {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+  margin: 0;
+}
+
+.dice-result {
+  text-align: center;
+  background-color: #b00020;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-weight: 700;
+  font-size: 1.3rem;
+  min-width: 44px;
+  min-height: 32px;
+}
+
+/* Platforms */
+#ui_dado #platform,
+#ui_dado #platform_monstro {
+  margin: 0 auto;
+  height: 160px;
+  width: 160px;
+  transform-style: preserve-3d;
+  overflow: visible;
+  position: relative;
+}
+
+/* Both dice base */
+#ui_dado #dice,
+#ui_dado #dice_monstro {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  transform-style: preserve-3d;
+  transform: rotateX(15deg) rotateY(10deg) rotateZ(-15deg);
+  cursor: pointer;
+}
+
+/* White die (player) */
+#ui_dado #dice .side {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: #fff;
+  box-shadow: inset 0 0 40px #ccc;
+  border-radius: 20px;
+}
+
+#ui_dado #dice .cover,
+#ui_dado #dice .inner {
+  background: #e0e0e0;
+  box-shadow: none;
+}
+
+/* Black die (monster) */
+#ui_dado #dice_monstro .side {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: #1c1c1c;
+  box-shadow: inset 0 0 40px #000;
+  border-radius: 20px;
+}
+
+#ui_dado #dice_monstro .cover,
+#ui_dado #dice_monstro .inner {
+  background: #111;
+  box-shadow: none;
+}
+
+/* Shared cover */
+#ui_dado #dice .cover,
+#ui_dado #dice_monstro .cover {
+  border-radius: 0;
+}
+
+#ui_dado #dice .cover.x,
+#ui_dado #dice_monstro .cover.x {
+  transform: rotateY(90deg);
+}
+
+#ui_dado #dice .cover.z,
+#ui_dado #dice_monstro .cover.z {
+  transform: rotateX(90deg);
+}
+
+/* Shared face transforms */
+#ui_dado #dice .front,
+#ui_dado #dice_monstro .front {
+  transform: translateZ(50px);
+}
+
+#ui_dado #dice .front.inner,
+#ui_dado #dice_monstro .front.inner {
+  transform: translateZ(49px);
+}
+
+#ui_dado #dice .back,
+#ui_dado #dice_monstro .back {
+  transform: rotateX(-180deg) translateZ(50px);
+}
+
+#ui_dado #dice .back.inner,
+#ui_dado #dice_monstro .back.inner {
+  transform: rotateX(-180deg) translateZ(49px);
+}
+
+#ui_dado #dice .right,
+#ui_dado #dice_monstro .right {
+  transform: rotateY(90deg) translateZ(50px);
+}
+
+#ui_dado #dice .right.inner,
+#ui_dado #dice_monstro .right.inner {
+  transform: rotateY(90deg) translateZ(49px);
+}
+
+#ui_dado #dice .left,
+#ui_dado #dice_monstro .left {
+  transform: rotateY(-90deg) translateZ(50px);
+}
+
+#ui_dado #dice .left.inner,
+#ui_dado #dice_monstro .left.inner {
+  transform: rotateY(-90deg) translateZ(49px);
+}
+
+#ui_dado #dice .top,
+#ui_dado #dice_monstro .top {
+  transform: rotateX(90deg) translateZ(50px);
+}
+
+#ui_dado #dice .top.inner,
+#ui_dado #dice_monstro .top.inner {
+  transform: rotateX(90deg) translateZ(49px);
+}
+
+#ui_dado #dice .bottom,
+#ui_dado #dice_monstro .bottom {
+  transform: rotateX(-90deg) translateZ(50px);
+}
+
+#ui_dado #dice .bottom.inner,
+#ui_dado #dice_monstro .bottom.inner {
+  transform: rotateX(-90deg) translateZ(49px);
+}
+
+/* Player die dots (dark on white) */
+#ui_dado #dice .dot {
+  position: absolute;
+  width: 23px;
+  height: 23px;
+  border-radius: 23px;
+  background: #444;
+  box-shadow: inset 5px 0 10px #000;
+}
+
+/* Monster die dots (light on black) */
+#ui_dado #dice_monstro .dot {
+  position: absolute;
+  width: 23px;
+  height: 23px;
+  border-radius: 23px;
+  background: #f0f0f0;
+  box-shadow: inset 5px 0 10px rgba(255, 255, 255, 0.25);
+}
+
+/* Shared dot positions */
+#ui_dado #dice .dot.center,
+#ui_dado #dice_monstro .dot.center {
+  margin: 38px 0 0 38px;
+}
+
+#ui_dado #dice .dot.center.dleft,
+#ui_dado #dice_monstro .dot.center.dleft {
+  margin: 38px 0 0 10px;
+}
+
+#ui_dado #dice .dot.center.dright,
+#ui_dado #dice_monstro .dot.center.dright {
+  margin: 38px 0 0 67px;
+}
+
+#ui_dado #dice .dot.dtop,
+#ui_dado #dice_monstro .dot.dtop {
+  margin-top: 10px;
+}
+
+#ui_dado #dice .dot.dleft,
+#ui_dado #dice_monstro .dot.dleft {
+  margin-left: 67px;
+}
+
+#ui_dado #dice .dot.dright,
+#ui_dado #dice_monstro .dot.dright {
+  margin-left: 10px;
+}
+
+#ui_dado #dice .dot.dbottom,
+#ui_dado #dice_monstro .dot.dbottom {
+  margin-top: 67px;
+}
+
+@keyframes dice-bounce {
+  0%   { transform: translateY(0px)   scale(1);    }
+  18%  { transform: translateY(-38px) scale(1.06); }
+  40%  { transform: translateY(4px)   scale(0.97); }
+  58%  { transform: translateY(-18px) scale(1.03); }
+  74%  { transform: translateY(2px)   scale(0.99); }
+  86%  { transform: translateY(-7px)  scale(1.01); }
+  100% { transform: translateY(0px)   scale(1);    }
+}
+
+/* ===== BANNER DE TURNO ===== */
+.turn-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  pointer-events: none;
+}
+.turn-banner.is-hidden { display: none; }
+
+.turn-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10, 10, 10, 0.82);
+  border: 2px solid rgba(255, 215, 0, 0.55);
+  border-radius: 24px;
+  padding: 6px 18px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.turn-banner.is-my-turn .turn-banner-inner {
+  border-color: #ffd700;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.65), 0 4px 18px rgba(0,0,0,0.55);
+  animation: turn-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes turn-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.5), 0 4px 18px rgba(0,0,0,0.55); }
+  50%       { box-shadow: 0 0 28px rgba(255, 215, 0, 0.95), 0 4px 18px rgba(0,0,0,0.55); }
+}
+
+.turn-banner-label {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.turn-banner-player {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.turn-banner.is-my-turn .turn-banner-player {
+  color: #fff;
+}
+
+.turn-banner-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,215,0,0.18);
+  color: #ffd700;
+}
+
+.turn-banner.is-my-turn .turn-banner-tag {
+  background: #ffd700;
+  color: #1a1a1a;
+}
+
+/* ===== MODAL DE ORDEM DOS TURNOS ===== */
+.turn-order-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.turn-order-modal {
+  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  border: 2px solid rgba(255,215,0,0.7);
+  border-radius: 20px;
+  padding: 32px 40px;
+  min-width: 320px;
+  max-width: 480px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(255,215,0,0.25);
+  animation: scaleIn 0.25s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.turn-order-modal h2 {
+  color: #ffd700;
+  font-size: 1.4rem;
+  margin: 0 0 6px 0;
+}
+
+.turn-order-modal .subtitle {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+
+.turn-order-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.turn-order-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.turn-order-list li:first-child {
+  background: rgba(255,215,0,0.15);
+  border: 1px solid rgba(255,215,0,0.4);
+}
+
+.turn-order-pos {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,215,0,0.2);
+  color: #ffd700;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.turn-order-list li:first-child .turn-order-pos {
+  background: #ffd700;
+  color: #1a1a1a;
+}
+
+.turn-order-name { flex: 1; text-align: left; }
+.turn-order-first-badge {
+  font-size: 0.68rem;
+  background: #ffd700;
+  color: #1a1a1a;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.turn-order-modal .btn-confirm {
+  margin-top: 4px;
+  padding: 10px 32px;
+  font-size: 1rem;
+}
+
+/* ===== BLOQUEIO DE TURNO ===== */
+body.turn-locked .card-message-actions button:not(.is-hidden):not(#joinCombatBtn):not(#skipCombatBtn):not(#combatReadyBtn):not(#proporOfertaBtn):not(#recusarAjudarBtn):not(#propostaRecebidaBtn):not(#startGameInCardBtn) {
+  opacity: 0.4;
+  pointer-events: none;
+}
+body.turn-locked #messageCard .card-message-text {
+  color: #aaa;
+  font-style: italic;
+}
+
+/* ===== HISTÓRICO — EVENTOS DE TURNO ===== */
+.historico-item-evento {
+  background: linear-gradient(135deg, rgba(100, 80, 20, 0.25), rgba(60, 40, 10, 0.35));
+  border-left: 3px solid #c9a84c;
+}
+.historico-evento-icon {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2c46a;
+}
+.historico-evento-descricao {
+  font-size: 0.78rem;
+  color: #ccc;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ===== SISTEMA DE TOGGLE OPPONENT CARDS ===== */
+.is-opponents-hidden {
+  display: none !important;
+}
+
+/* Botão de toggle para cartelas dos oponentes */
+.toggle-opponents-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 200, 0, 0.8);
+  background: rgba(10, 10, 10, 0.9);
+  color: #ffc800;
+  font-size: 1.4rem;
+  font-weight: 700;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.toggle-opponents-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(255, 200, 0, 0.6);
+}
+
+.toggle-opponents-btn:active {
+  transform: scale(0.95);
+}
+
+/* M cards (personagens dos oponentes) - clicáveis para mostrar cartelas */
+[data-card^="M"] {
+  pointer-events: auto;
+}
+
+/* ── Modal Pedir Ajuda ─────────────────────────────────────── */
+.help-modal-content {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 36px 32px 28px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+  max-width: 480px;
+  width: 92%;
+  border: 2px solid #ffd700;
+  position: relative;
+}
+
+.help-modal-content h2 {
+  color: #ffd700;
+  text-align: center;
+  margin: 0 0 6px;
+  font-size: 1.7rem;
+  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+}
+
+.help-modal-subtitle,
+.help-modal-terms-label {
+  color: #ccc;
+  text-align: center;
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+
+.help-modal-terms-label {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #ffd700aa;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.help-modal-divider {
+  height: 1px;
+  background: rgba(255, 215, 0, 0.25);
+  margin: 14px 0;
+}
+
+/* Lista de jogadores */
+.help-modal-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.help-player-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.help-player-item:hover {
+  border-color: rgba(255, 215, 0, 0.55);
+  background: rgba(255, 215, 0, 0.07);
+}
+
+.help-player-item.selected {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.15);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.25);
+}
+
+.help-player-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  background: #333;
+  flex-shrink: 0;
+}
+
+.help-player-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 215, 0, 0.15);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.help-player-name {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.help-player-forca {
+  margin-left: auto;
+  color: #ffd700;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.help-player-empty {
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  padding: 10px 0;
+}
+
+/* Botões de termos */
+.help-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-action-btn {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+}
+
+.help-action-btn:hover:not(:disabled) {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.12);
+  transform: translateX(3px);
+}
+
+.help-action-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.help-action-btn.selected {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+/* Botão especial "Receber ofertas" */
+.help-receber-ofertas-btn {
+  border-color: rgba(100, 180, 255, 0.5);
+  color: #a0d8ff;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.help-receber-ofertas-btn:hover:not(:disabled) {
+  border-color: #64b4ff;
+  background: rgba(100, 180, 255, 0.12);
+  transform: none;
+}
+.help-receber-ofertas-btn.ativo {
+  border-color: #64b4ff;
+  background: rgba(100, 180, 255, 0.2);
+  color: #64b4ff;
+}
+
+/* Botão flutuante de proposta recebida */
+.proposal-pending-btn {
+  animation: proposal-pulse 1.5s ease-in-out infinite;
+  border-color: #ff9500 !important;
+  color: #ff9500 !important;
+}
+@keyframes proposal-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 149, 0, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(255, 149, 0, 0); }
+}
+
+/* Modal de proposta recebida */
+.proposta-info {
+  background: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 4px;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.proposta-info .proposta-tipo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-top: 6px;
+}
+.proposta-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.proposta-aceitar-btn {
+  border-color: rgba(80, 200, 80, 0.5) !important;
+  color: #7ddf7d !important;
+}
+.proposta-aceitar-btn:hover:not(:disabled) {
+  border-color: #50c850 !important;
+  background: rgba(80, 200, 80, 0.12) !important;
+}
+.proposta-recusar-btn {
+  border-color: rgba(220, 70, 70, 0.5) !important;
+  color: #f08080 !important;
+}
+.proposta-recusar-btn:hover:not(:disabled) {
+  border-color: #dc4646 !important;
+  background: rgba(220, 70, 70, 0.12) !important;
+}
+.proposta-contra-btn {
+  border-color: rgba(255, 165, 0, 0.4) !important;
+  color: #ffb347 !important;
+}
+.proposta-contra-btn:hover:not(:disabled) {
+  border-color: #ffa500 !important;
+  background: rgba(255, 165, 0, 0.12) !important;
+}
+.proposta-contra-form {
+  margin-top: 8px;
+}
+.proposta-oferta-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 4px;
+}
+.ajuda-aguardando-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #c9a84c;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 6px;
+  padding: 5px 10px;
+  margin-top: 4px;
+  pointer-events: none;
+}
+.ajuda-aguardando-status.is-hidden { display: none !important; }
+.ajuda-aguardando-icon {
+  animation: spin 1.6s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Distribuição de tesouros (combate duo) ── */
+#distribuicaoModal {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 20000;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+#distribuicaoModal .distribuicao-content {
+  pointer-events: auto;
+}
+#distribuicaoModal.is-hidden {
+  display: none !important;
+}
+#distribuicaoModal .distribuicao-content {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  border: 2px solid #ffd700;
+  color: #fff;
+  position: relative;
+}
+#distribuicaoModal h2 {
+  color: #ffd700;
+  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.4);
+}
+
+.distribuicao-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 0;
+  justify-content: center;
+}
+.distribuicao-card {
+  width: 90px;
+  height: 126px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid rgba(255,255,255,0.15);
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+  background-size: cover;
+  background-position: center;
+  background-color: #333;
+  position: relative;
+}
+.distribuicao-card:hover {
+  border-color: rgba(255,255,255,0.35);
+}
+.distribuicao-card.selected {
+  border-color: #4caf50;
+  box-shadow: 0 0 14px rgba(76,175,80,0.7);
+}
+.distribuicao-card.waiting {
+  cursor: default;
+  opacity: 0.5;
+}
+.distribuicao-card input[type="checkbox"] {
+  display: none;
+}
+
