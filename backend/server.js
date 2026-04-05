@@ -4229,15 +4229,19 @@ app.post('/api/mochila/dar-para-jogador', authenticateToken, async (req, res) =>
 });
 
 // ─── Helper: derivar caminho do personagem a partir de caminho_imagem da carta do slot 79 ───
+// Mapa de personagens existentes no Supabase Storage (evita fs.existsSync que falha no Render)
+const PERSONAGEM_MAP = {
+  '39': 'Feminino', '41': 'Feminino', '43': 'Feminino',
+  '40': 'Masculino', '42': 'Masculino', '44': 'Masculino',
+};
+
 function deriveCharacterPath(caminhoImagem) {
   if (!caminhoImagem) return null;
   const baseName = path.basename(caminhoImagem, path.extname(caminhoImagem));
   const num = baseName.replace(/\D/g, '');
   if (!num) return null;
-  const masculinoFile = path.join(__dirname, '..', 'Personagens', 'Masculino', `${num}.png`);
-  const femininoFile  = path.join(__dirname, '..', 'Personagens', 'Feminino',  `${num}.png`);
-  if (fs.existsSync(masculinoFile)) return `Personagens/Masculino/${num}.png`;
-  if (fs.existsSync(femininoFile))  return `Personagens/Feminino/${num}.png`;
+  const gender = PERSONAGEM_MAP[num];
+  if (gender) return `Personagens/${gender}/${num}.png`;
   return null;
 }
 // ──────────────────────────────────────────────────────────────────────────────
